@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Студия медитаций — Елена Кирсанова</title>
+<meta name="theme-color" content="#f6efe6">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Студия">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6efe6; --card:#fffaf3; --ink:#3b302c; --muted:#8b7a70; --line:#eadfd2;
+  --sage:#7f9473; --sage-d:#62775a; --mauve:#a9809c; --gold:#c49a5c; --red:#c0605a;
+  --shadow:0 6px 24px rgba(90,60,40,.08); --r:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:16px;line-height:1.45}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.wrap{max-width:920px;margin:0 auto;padding:18px 16px 90px}
+header{display:flex;align-items:center;gap:14px;margin:6px 0 16px}
+.logo{width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3e3,#e7cfb6 60%,#cfa98a);display:grid;place-items:center;box-shadow:var(--shadow);flex:none}
+.logo svg{width:28px;height:28px}
+h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:30px;margin:0;line-height:1.05}
+.sub{color:var(--muted);font-size:13.5px}
+h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:24px;margin:0 0 6px}
+h3{font-size:15px;margin:0 0 8px;font-weight:700}
+.tabs{display:flex;gap:6px;background:#efe4d7;padding:5px;border-radius:999px;position:sticky;top:6px;z-index:5;box-shadow:var(--shadow);overflow-x:auto}
+.tab{flex:1;border:0;background:transparent;padding:10px 12px;border-radius:999px;font:inherit;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--card);color:var(--ink);box-shadow:0 2px 8px rgba(90,60,40,.1)}
+.panel{display:none;margin-top:16px}
+.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.muted{color:var(--muted)} .small{font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}.tab{padding:9px 8px;font-size:13px}}
+button,.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 16px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+button:hover{border-color:#d9c6b2}
+button:disabled{opacity:.45;cursor:default}
+.primary{background:var(--sage);border-color:var(--sage);color:#fff}
+.primary:hover{background:var(--sage-d)}
+.ghost{background:transparent}
+.danger{color:var(--red)}
+.mini{padding:6px 11px;font-size:13px}
+label.f{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+textarea{min-height:110px;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--sage)}
+.sl{display:grid;grid-template-columns:150px 1fr 54px;gap:10px;align-items:center;margin:8px 0}
+.sl span.v{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+@media(max-width:520px){.sl{grid-template-columns:1fr 54px}.sl label{grid-column:1/3}}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:8px 0;font-size:14.5px}
+.chk input{margin-top:3px;accent-color:var(--sage);width:18px;height:18px}
+.recbox{display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}
+.recbtn{width:96px;height:96px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 30%,#e9918a,var(--red));color:#fff;font-size:15px;font-weight:700;box-shadow:0 8px 24px rgba(192,96,90,.35);justify-content:center}
+.recbtn.on{animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,96,90,.45)}70%{box-shadow:0 0 0 18px rgba(192,96,90,0)}100%{box-shadow:0 0 0 0 rgba(192,96,90,0)}}
+.timer{font-size:28px;font-variant-numeric:tabular-nums;font-weight:600}
+.meter{width:100%;max-width:420px;height:10px;background:#efe4d7;border-radius:999px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sage),var(--gold) 80%,var(--red));transition:width .06s}
+.prompter{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;max-height:46vh;overflow:auto;white-space:pre-wrap;font-family:"Cormorant Garamond",Georgia,serif;font-size:26px;line-height:1.5;width:100%}
+.seg{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px dashed var(--line)}
+.seg:first-child{border-top:0}
+.seg .n{width:28px;height:28px;border-radius:50%;background:#efe4d7;display:grid;place-items:center;font-size:13px;font-weight:700}
+.seg input[type=text]{padding:6px 10px}
+.seg .meta{font-size:12.5px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.seg .meta input{width:62px;padding:4px 8px;border-radius:8px}
+.seg .acts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.iconb{width:34px;height:34px;padding:0;justify-content:center;border-radius:50%}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;background:#efe4d7;font-size:12px;font-weight:600;color:#6f5d53}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.presets button{font-size:13.5px;padding:8px 13px}
+.timeline{display:flex;height:34px;border-radius:10px;overflow:hidden;background:#efe4d7;cursor:pointer;position:relative;margin:10px 0 4px}
+.timeline div{height:100%}
+.tl-m{background:repeating-linear-gradient(45deg,#e3d3c2,#e3d3c2 6px,#eadccd 6px,#eadccd 12px)}
+.tl-v{background:var(--mauve);border-left:1px solid #fff}
+.tl-p{background:#d9c6e0}
+.tl-cursor{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--ink);border-radius:2px;pointer-events:none}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.prog{height:8px;background:#efe4d7;border-radius:999px;overflow:hidden;margin:10px 0 6px}
+.prog i{display:block;height:100%;width:0;background:var(--sage);transition:width .2s}
+.note{background:#f3ebe0;border-radius:12px;padding:10px 12px;font-size:13.5px;color:#6c5a50}
+.warn{background:#f8e6e2;color:#8a3f39}
+.lib{display:grid;gap:12px}
+.item{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}
+.item .t{font-weight:700;font-size:16px}
+.item audio{width:100%;margin-top:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+.chip{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:999px;font-size:13px;cursor:pointer;font-weight:600;color:var(--muted)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.hidden{display:none!important}
+.big{font-size:15.5px}
+.stat{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.layer{border-top:1px dashed var(--line);padding-top:10px;margin-top:10px}
+.layer:first-of-type{border-top:0;margin-top:0;padding-top:0}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#7a5a45" stroke-width="1.6" stroke-linecap="round"><path d="M12 3c-2 3-2 6 0 9 2-3 2-6 0-9z"/><path d="M12 12c-3-2-6-2-8.5 0 2.5 2.5 5.5 2.5 8.5 0z"/><path d="M12 12c3-2 6-2 8.5 0-2.5 2.5-5.5 2.5-8.5 0z"/><path d="M4 18c2.5 2 13.5 2 16 0"/></svg></div>
+    <div><h1>Студия медитаций</h1><div class="sub">Голос + медитативная музыка → готовый MP3</div></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab on" data-tab="voice">🎙 Голос</button>
+    <button class="tab" data-tab="music">🎵 Музыка</button>
+    <button class="tab" data-tab="mix">🎚 Сведение</button>
+    <button class="tab" data-tab="library">📚 Библиотека</button>
+  </nav>
+
+  <!-- ============ ГОЛОС ============ -->
+  <section class="panel on" id="p-voice">
+    <div class="card">
+      <h2>Запись голоса</h2>
+      <p class="muted small" style="margin-top:0">Записывайте медитацию частями: каждая часть станет фрагментом, а между фрагментами можно задать паузы для практики (дыхание, тишина, погружение). Любой фрагмент можно перезаписать, удалить или переставить.</p>
+      <div class="grid2">
+        <div>
+          <label class="f">Микрофон</label>
+          <select id="micSel"><option value="">По умолчанию</option></select>
+        </div>
+        <div>
+          <label class="f">&nbsp;</label>
+          <label class="chk" style="margin:6px 0"><input type="checkbox" id="noiseSup"> <span>Шумоподавление браузера <span class="muted small">(обычно не нужно: ваш микрофон сам отсекает шум)</span></span></label>
+        </div>
+      </div>
+      <div class="recbox">
+        <div class="timer" id="recTime">00:00</div>
+        <div class="meter"><i id="meterBar"></i></div>
+        <div class="small muted" id="recHint">Нажмите, чтобы начать запись фрагмента</div>
+        <button class="recbtn" id="recBtn">Запись</button>
+        <div class="row hidden" id="recCtl">
+          <button id="recPause">⏸ Пауза</button>
+          <button class="primary" id="recStop">✓ Сохранить фрагмент</button>
+          <button class="ghost danger" id="recCancel">Отменить</button>
+        </div>
+        <div class="note warn hidden" id="micErr"></div>
+      </div>
+      <div id="prompterWrap" class="hidden" style="margin-top:8px">
+        <div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="small muted">Суфлёр — прокручивайте пальцем</span><span><button class="mini" id="fsMinus">A−</button> <button class="mini" id="fsPlus">A+</button></span></div>
+        <div class="prompter" id="prompter"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">Фрагменты медитации</h3>
+        <label class="btn mini" style="cursor:pointer">＋ Загрузить аудиофайлы<input type="file" id="voiceFiles" accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm,.aac" multiple hidden></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="trim" checked> <span>Автоматически обрезать тишину в начале и конце фрагмента и выравнивать громкость</span></label>
+      <div id="segList"><p class="muted small">Пока нет фрагментов. Запишите голос или загрузите готовую запись (например, из диктофона телефона).</p></div>
+      <div class="row small muted" style="margin-top:8px" id="voiceTotal"></div>
+    </div>
+
+    <div class="card">
+      <h3>Текст медитации (суфлёр)</h3>
+      <p class="muted small" style="margin-top:0">Вставьте текст — во время записи он появится крупным шрифтом. Сохраняется автоматически.</p>
+      <textarea id="script" placeholder="Устройтесь удобно… Закройте глаза… Сделайте глубокий вдох…"></textarea>
+    </div>
+  </section>
+
+  <!-- ============ МУЗЫКА ============ -->
+  <section class="panel" id="p-music">
+    <div class="card">
+      <h2>Медитативная музыка</h2>
+      <p class="muted small" style="margin-top:0">Музыка создаётся прямо в студии (звуковой синтез), поэтому она ваша и её можно продавать в составе медитаций. Каждый раз она звучит одинаково для одних и тех же настроек.</p>
+      <h3>Готовые шаблоны</h3>
+      <div class="presets" id="presets"></div>
+    </div>
+    <div class="card">
+      <div class="grid2">
+        <div><label class="f">Настроение гармонии</label>
+          <select id="mood">
+            <option value="calm">Спокойствие (минор, мягко)</option>
+            <option value="light">Свет (мажор, тепло)</option>
+            <option value="deep">Глубина (низкий дрон, погружение)</option>
+            <option value="heart">Сердце (нежно, любовь, принятие)</option>
+            <option value="space">Космос (простор, лёгкость)</option>
+          </select></div>
+        <div><label class="f">Строй</label>
+          <select id="tuning"><option value="432">A = 432 Гц</option><option value="440">A = 440 Гц (стандарт)</option></select></div>
+      </div>
+      <div class="layer" style="margin-top:14px">
+        <div class="sl"><label>Пэд (тёплые аккорды)</label><input type="range" id="padVol" min="0" max="100"><span class="v" id="padVolV"></span></div>
+      </div>
+      <div class="layer">
+        <div class="sl"><label>Поющие чаши</label><input type="range" id="bowlVol" min="0" max="100"><span class="v" id="bowlVolV"></span></div>
+        <div class="sl"><label class="small muted">Удар примерно раз в</label><input type="range" id="bowlEvery" min="5" max="45"><span class="v" id="bowlEveryV"></span></div>
+      </div>
+      <div class="layer">
+        <div class="sl"><label>Океан</label><input type="range" id="oceanVol" min="0" max="100"><span class="v" id="oceanVolV"></span></div>
+        <div class="sl"><label>Дождь</label><input type="range" id="rainVol" min="0" max="100"><span class="v" id="rainVolV"></span></div>
+      </div>
+      <div class="layer">
+        <div class="sl"><label>Бинауральные ритмы</label><input type="range" id="binVol" min="0" max="100"><span class="v" id="binVolV"></span></div>
+        <div class="grid2">
+          <select id="binType">
+            <option value="alpha">Альфа 10 Гц — расслабленное бодрствование</option>
+            <option value="theta">Тета 6 Гц — глубокая медитация, транс</option>
+            <option value="delta">Дельта 2,5 Гц — сон</option>
+          </select>
+          <div class="small muted" style="align-self:center">Работают только в наушниках, держите их тихими (10–25%).</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:14px"><button id="musicPrev">▶ Послушать музыку 30 с</button><button class="ghost hidden" id="musicStop">■ Стоп</button></div>
+    </div>
+    <div class="card">
+      <h3>Своя музыкальная дорожка</h3>
+      <p class="muted small" style="margin-top:0">Можно добавить свой файл: он зациклится на всю длину медитации с плавными переходами. <b>Для продажи используйте только музыку, на которую у вас есть лицензия</b> (собственная, купленная с правом коммерческого использования или royalty‑free с разрешением на продажу).</p>
+      <div class="row">
+        <label class="btn" style="cursor:pointer">＋ Выбрать файл<input type="file" id="customFile" accept="audio/*,.mp3,.m4a,.wav,.ogg" hidden></label>
+        <span id="customName" class="small muted">Не выбрано</span>
+        <button class="ghost danger mini hidden" id="customDel">Убрать</button>
+      </div>
+      <div class="sl"><label>Громкость дорожки</label><input type="range" id="customVol" min="0" max="100"><span class="v" id="customVolV"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ СВЕДЕНИЕ ============ -->
+  <section class="panel" id="p-mix">
+    <div class="card">
+      <h2>Сведение</h2>
+      <div class="row" style="gap:22px">
+        <div><div class="small muted">Длительность</div><div class="stat" id="totDur">0:00</div></div>
+        <div><div class="small muted">Голос</div><div class="stat" id="totVoice">0:00</div></div>
+        <div><div class="small muted">Фрагментов</div><div class="stat" id="totSegs">0</div></div>
+      </div>
+      <div class="timeline" id="timeline" title="Нажмите, чтобы выбрать место прослушивания"></div>
+      <div class="legend"><span><b style="background:#e3d3c2"></b>только музыка</span><span><b style="background:var(--mauve)"></b>голос</span><span><b style="background:#d9c6e0"></b>паузы</span><span>▍ — место прослушивания</span></div>
+      <div class="row" style="margin-top:12px">
+        <button class="primary" id="prevBtn">▶ Прослушать 60 с с отметки <span id="prevAt">0:00</span></button>
+        <button class="ghost hidden" id="prevStop">■ Стоп</button>
+        <span class="small muted" id="prevStatus"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Структура</h3>
+      <div class="sl"><label>Вступление (музыка до голоса)</label><input type="range" id="intro" min="0" max="120"><span class="v" id="introV"></span></div>
+      <div class="sl"><label>Завершение (музыка после)</label><input type="range" id="outro" min="5" max="600" step="5"><span class="v" id="outroV"></span></div>
+      <div class="sl"><label>Не короче, мин</label><input type="range" id="minTotal" min="0" max="90"><span class="v" id="minTotalV"></span></div>
+      <div class="small muted" style="margin:-2px 0 6px">Для медитаций на сон: музыка продолжится после голоса до этой длительности.</div>
+      <div class="sl"><label>Плавное появление</label><input type="range" id="fadeIn" min="0" max="30"><span class="v" id="fadeInV"></span></div>
+      <div class="sl"><label>Плавное затухание</label><input type="range" id="fadeOut" min="2" max="120"><span class="v" id="fadeOutV"></span></div>
+    </div>
+
+    <div class="card">
+      <h3>Баланс и обработка голоса</h3>
+      <div class="sl"><label>Громкость голоса</label><input type="range" id="voiceDb" min="-12" max="8"><span class="v" id="voiceDbV"></span></div>
+      <div class="sl"><label>Громкость музыки</label><input type="range" id="musicDb" min="-30" max="0"><span class="v" id="musicDbV"></span></div>
+      <div class="sl"><label>Приглушать музыку под голосом</label><input type="range" id="duckDb" min="0" max="15"><span class="v" id="duckDbV"></span></div>
+      <div class="sl"><label>Объём (реверберация)</label><input type="range" id="reverb" min="0" max="60"><span class="v" id="reverbV"></span></div>
+      <label class="chk"><input type="checkbox" id="comp"> <span>Компрессор — ровная, «бархатная» громкость голоса</span></label>
+      <label class="chk"><input type="checkbox" id="gate"> <span>Тишина между фразами — убирает фоновое шипение в паузах</span></label>
+    </div>
+
+    <div class="card">
+      <h2>Создать медитацию</h2>
+      <div class="grid2">
+        <div><label class="f">Название</label><input type="text" id="mTitle" placeholder="Например: Глубокий сон"></div>
+        <div><label class="f">Раздел</label><select id="mCat"></select></div>
+        <div><label class="f">Для клиента (необязательно)</label><input type="text" id="mClient" placeholder="Имя — для индивидуальных медитаций"></div>
+        <div><label class="f">Качество MP3</label><select id="kbps"><option value="128">128 кбит/с — компактно</option><option value="160">160 кбит/с — оптимально</option><option value="192">192 кбит/с — высокое</option></select></div>
+      </div>
+      <div style="margin-top:12px"><label class="f">Описание (для продажи)</label><textarea id="mDesc" style="min-height:70px" placeholder="Кому подходит, что даёт, как слушать"></textarea></div>
+      <div class="row" style="margin-top:12px">
+        <button class="primary big" id="exportBtn">✦ Создать MP3</button>
+        <button class="ghost danger hidden" id="exportCancel">Остановить</button>
+      </div>
+      <div id="exportProg" class="hidden">
+        <div class="prog"><i id="exportBar"></i></div>
+        <div class="small muted" id="exportTxt"></div>
+        <div class="note small" style="margin-top:8px">Не закрывайте вкладку и не блокируйте экран, пока идёт создание. Примерная скорость: 10–20 минут медитации собираются за 1–4 минуты (на телефоне дольше).</div>
+      </div>
+      <div id="exportDone" class="hidden" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <!-- ============ БИБЛИОТЕКА ============ -->
+  <section class="panel" id="p-library">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Мои медитации</h2>
+        <span class="small muted" id="libCount"></span>
+      </div>
+      <input type="text" id="libSearch" placeholder="Поиск по названию, клиенту, описанию" style="margin-top:12px">
+      <div class="chips" id="libChips"></div>
+      <div class="lib" id="libList"></div>
+    </div>
+    <div class="card">
+      <h3>Резервная копия</h3>
+      <p class="muted small" style="margin-top:0">Медитации хранятся в этом браузере на этом устройстве. Регулярно скачивайте архив библиотеки, чтобы ничего не потерять и переносить медитации между устройствами.</p>
+      <div class="row">
+        <button id="backupBtn">⬇ Скачать архив библиотеки (.zip)</button>
+        <label class="btn" style="cursor:pointer">⬆ Загрузить архив<input type="file" id="restoreFile" accept=".zip,application/zip" hidden></label>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Новый проект</h3>
+      <p class="muted small" style="margin-top:0">Очистит текущие фрагменты голоса, текст суфлёра и свою дорожку. Готовые медитации в библиотеке останутся.</p>
+      <button class="danger" id="newProject">Начать новую медитацию</button>
+    </div>
+  </section>
+
+  <footer>© Елена Кирсанова · Студия медитаций</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="text/plain" id="lameSrc">/*LAME*/</script>
+<script type="text/plain" id="engineSrc">/*ENGINE*/</script>
+<script>
+(function(){
+'use strict';
+var SR = 44100;
+var $ = function(s){ return document.querySelector(s); };
+var CATS = ['Сон','Тревога и стресс','Расслабление','Самооценка и любовь к себе','Отношения','Деньги и изобилие','Тело и психосоматика','Утро и энергия','Погружение и регрессия','Прощение и отпускание','Для детей','Индивидуальные','Другое'];
+var DEF = {intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,mood:'calm',tuning:432,padVol:70,bowlVol:40,bowlEvery:16,oceanVol:0,rainVol:0,binVol:0,binType:'theta',binCarrier:200,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,kbps:160,fs:26};
+var PRESETS = [
+  ['🌙 Сон',{mood:'deep',padVol:70,bowlVol:0,oceanVol:35,rainVol:0,binVol:18,binType:'delta',outro:120,fadeOut:60,reverb:22}],
+  ['🍃 Расслабление',{mood:'calm',padVol:70,bowlVol:40,oceanVol:0,rainVol:0,binVol:0,outro:40,fadeOut:15,reverb:18}],
+  ['☀️ Утро и энергия',{mood:'light',padVol:70,bowlVol:50,bowlEvery:12,oceanVol:0,rainVol:0,binVol:15,binType:'alpha',outro:30,fadeOut:12,reverb:14}],
+  ['🌀 Погружение / регрессия',{mood:'deep',padVol:75,bowlVol:25,bowlEvery:24,oceanVol:0,rainVol:0,binVol:22,binType:'theta',outro:60,fadeOut:25,reverb:24}],
+  ['💗 Сердце, принятие',{mood:'heart',padVol:70,bowlVol:35,oceanVol:0,rainVol:0,binVol:0,outro:45,fadeOut:18,reverb:20}],
+  ['🌊 Природа',{mood:'calm',padVol:40,bowlVol:20,oceanVol:50,rainVol:20,binVol:0,outro:45,fadeOut:18,reverb:16}],
+  ['✨ Космос',{mood:'space',padVol:70,bowlVol:30,oceanVol:0,rainVol:0,binVol:15,binType:'theta',outro:45,fadeOut:20,reverb:26}]
+];
+
+var S = Object.assign({}, DEF);
+var segs = [];          // {id,name,pause,blob,dur}
+var script = '';
+var customBlob = null, customName = '';
+var prevAt = 0;
+
+/* ---------- утилиты ---------- */
+function fmt(sec){ sec=Math.max(0,Math.round(sec)); var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60; return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0'); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+var tt; function toast(t){ var e=$('#toast'); e.textContent=t; e.classList.add('on'); clearTimeout(tt); tt=setTimeout(function(){e.classList.remove('on');},2800); }
+function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function slug(s){ return (s||'meditation').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,80)||'meditation'; }
+
+/* ---------- IndexedDB ---------- */
+var dbp = null;
+function db(){
+  if(dbp) return dbp;
+  dbp = new Promise(function(res){
+    try{
+      var r = indexedDB.open('meditation-studio',1);
+      r.onupgradeneeded = function(){ var d=r.result; if(!d.objectStoreNames.contains('library')) d.createObjectStore('library',{keyPath:'id'}); if(!d.objectStoreNames.contains('kv')) d.createObjectStore('kv'); };
+      r.onsuccess = function(){ res(r.result); };
+      r.onerror = function(){ res(null); };
+    }catch(e){ res(null); }
+  });
+  return dbp;
+}
+function tx(store, mode, fn){
+  return db().then(function(d){
+    if(!d) return null;
+    return new Promise(function(res,rej){
+      try{ var t=d.transaction(store,mode), s=t.objectStore(store), out=fn(s);
+        t.oncomplete=function(){ res(out && 'result' in out ? out.result : out); };
+        t.onerror=function(){ rej(t.error); }; t.onabort=function(){ rej(t.error); };
+      }catch(e){ rej(e); }
+    });
+  }).catch(function(e){ console.warn(e); return null; });
+}
+var kvGet=function(k){ return tx('kv','readonly',function(s){ return s.get(k); }); };
+var kvSet=function(k,v){ return tx('kv','readwrite',function(s){ s.put(v,k); }); };
+var libAll=function(){ return tx('library','readonly',function(s){ return s.getAll(); }).then(function(r){ return r||[]; }); };
+var libPut=function(v){ return tx('library','readwrite',function(s){ s.put(v); }); };
+var libDel=function(id){ return tx('library','readwrite',function(s){ s.delete(id); }); };
+
+var saveT;
+function saveDraft(){ clearTimeout(saveT); saveT=setTimeout(function(){
+  kvSet('draft',{settings:S,script:script,segs:segs.map(function(g){return {id:g.id,name:g.name,pause:g.pause,blob:g.blob,dur:g.dur};}),customBlob:customBlob,customName:customName,prevAt:prevAt});
+},500); }
+
+/* ---------- Web Worker (движок) ---------- */
+var worker, jobs = {}, jobN = 0;
+function makeWorker(){
+  var src = $('#lameSrc').textContent + '\n;\n' + $('#engineSrc').textContent;
+  worker = new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
+  worker.onmessage = function(e){
+    var m=e.data, j=jobs[m.job];
+    if(m.cmd==='progress'){ if(j&&j.progress) j.progress(m.p); return; }
+    if(!j) return;
+    delete jobs[m.job];
+    if(m.cmd==='error') j.reject(new Error(m.message)); else j.resolve(m);
+  };
+}
+function runJob(msg, progress){
+  return new Promise(function(resolve,reject){ var id=++jobN; jobs[id]={resolve:resolve,reject:reject,progress:progress}; msg.job=id; worker.postMessage(msg); });
+}
+function order(){ return segs.map(function(g){ return {id:g.id,pause:+g.pause||0}; }); }
+
+/* ---------- декодирование и подготовка голоса ---------- */
+function decode(blob){
+  return blob.arrayBuffer().then(function(ab){
+    var C = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    var ctx = new C(1, 1, SR);
+    return new Promise(function(res,rej){ var p=ctx.decodeAudioData(ab,res,rej); if(p&&p.then) p.then(res,rej); });
+  });
+}
+function mono(buf){
+  var n=buf.length, out=new Float32Array(n), c=buf.numberOfChannels;
+  for(var k=0;k<c;k++){ var d=buf.getChannelData(k); for(var i=0;i<n;i++) out[i]+=d[i]/c; }
+  return out;
+}
+function prepVoice(d, trim){
+  var FR=882, nF=Math.ceil(d.length/FR), r=new Float32Array(nF), mx=0, i, f;
+  for(f=0;f<nF;f++){ var s=0,e=Math.min(d.length,(f+1)*FR); for(i=f*FR;i<e;i++) s+=d[i]*d[i]; r[f]=Math.sqrt(s/Math.max(1,e-f*FR)); if(r[f]>mx) mx=r[f]; }
+  if(mx<1e-5) return d;
+  var thr=Math.max(mx*0.01, 0.0025);
+  if(trim){
+    var a=0,b=nF-1; while(a<nF&&r[a]<thr) a++; while(b>a&&r[b]<thr) b--;
+    var st=Math.max(0,a*FR-Math.round(0.25*SR)), en=Math.min(d.length,(b+1)*FR+Math.round(0.6*SR));
+    d=d.slice(st,en);
+    // мягкие края
+    var fl=Math.min(Math.round(0.03*SR),d.length>>2); for(i=0;i<fl;i++){ d[i]*=i/fl; d[d.length-1-i]*=i/fl; }
+  }
+  // выравнивание громкости по активной речи до −20 dBFS
+  var ss=0,cn=0,pk=0;
+  for(f=0;f<nF;f++) if(r[f]>=thr*3){ ss+=r[f]*r[f]; cn++; }
+  for(i=0;i<d.length;i++){ var v=Math.abs(d[i]); if(v>pk) pk=v; }
+  if(cn){ var g=Math.min(0.1/Math.sqrt(ss/cn), 1.6/Math.max(pk,1e-4)); for(i=0;i<d.length;i++) d[i]*=g; }
+  return d;
+}
+function loadSeg(g){
+  return decode(g.blob).then(function(buf){
+    var d=prepVoice(mono(buf), S.trim); g.dur=d.length/SR;
+    worker.postMessage({cmd:'voice',id:g.id,data:d},[d.buffer]);
+    return g;
+  });
+}
+function addSegment(blob, name){
+  var g={id:uid(),name:name,pause:2,blob:blob,dur:0,loading:true};
+  segs.push(g); renderSegs();
+  return loadSeg(g).then(function(){ g.loading=false; renderSegs(); updateInfo(); saveDraft(); })
+    .catch(function(e){ segs.splice(segs.indexOf(g),1); renderSegs(); toast('Не удалось прочитать аудио: '+(e&&e.message||'формат не поддерживается')); });
+}
+function loadCustom(blob){
+  return decode(blob).then(function(buf){
+    var L=buf.getChannelData(0).slice(), R=(buf.numberOfChannels>1?buf.getChannelData(1):buf.getChannelData(0)).slice();
+    worker.postMessage({cmd:'custom',data:{L:L,R:R}},[L.buffer,R.buffer]);
+    return buf.duration;
+  });
+}
+
+/* ---------- запись ---------- */
+var rec=null, recStream=null, recChunks=[], recT0=0, recAcc=0, recTimer=null, meterRaf=null, ac=null, recMime='';
+function getAC(){ if(!ac){ var C=window.AudioContext||window.webkitAudioContext; ac=new C(); } if(ac.state==='suspended') ac.resume(); return ac; }
+function micList(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.enumerateDevices) return;
+  navigator.mediaDevices.enumerateDevices().then(function(ds){
+    var sel=$('#micSel'), cur=sel.value; var ins=ds.filter(function(d){return d.kind==='audioinput';});
+    sel.innerHTML='<option value="">По умолчанию</option>'+ins.map(function(d,i){return '<option value="'+esc(d.deviceId)+'">'+esc(d.label||('Микрофон '+(i+1)))+'</option>';}).join('');
+    sel.value=cur;
+  }).catch(function(){});
+}
+function startRec(){
+  $('#micErr').classList.add('hidden');
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){ micError(); return; }
+  var dev=$('#micSel').value;
+  var c={echoCancellation:false,noiseSuppression:!!S.noiseSup,autoGainControl:false,channelCount:1};
+  if(dev) c.deviceId={exact:dev};
+  var actx=getAC();
+  navigator.mediaDevices.getUserMedia({audio:c}).then(function(stream){
+    recStream=stream; micList();
+    var types=['audio/webm;codecs=opus','audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm','audio/ogg;codecs=opus'];
+    recMime=''; for(var i=0;i<types.length;i++){ if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(types[i])){ recMime=types[i]; break; } }
+    var o={audioBitsPerSecond:192000}; if(recMime) o.mimeType=recMime;
+    try{ rec=new MediaRecorder(stream,o); }catch(e){ rec=new MediaRecorder(stream); }
+    recChunks=[]; rec.ondataavailable=function(e){ if(e.data&&e.data.size) recChunks.push(e.data); };
+    rec.start(1000);
+    recT0=Date.now(); recAcc=0;
+    recTimer=setInterval(tick,250);
+    var src=actx.createMediaStreamSource(stream), an=actx.createAnalyser(); an.fftSize=2048; src.connect(an);
+    var buf=new Float32Array(an.fftSize);
+    (function loop(){ an.getFloatTimeDomainData(buf); var p=0; for(var k=0;k<buf.length;k++){ var v=Math.abs(buf[k]); if(v>p) p=v; }
+      var db=20*Math.log10(p+1e-6), w=Math.max(0,Math.min(100,(db+60)/60*100)); $('#meterBar').style.width=w+'%';
+      if(p>0.97) $('#recHint').textContent='⚠ Слишком громко — отодвиньтесь от микрофона или уменьшите усиление';
+      meterRaf=requestAnimationFrame(loop); })();
+    $('#recBtn').classList.add('on'); $('#recBtn').textContent='Идёт запись';
+    $('#recCtl').classList.remove('hidden'); $('#recHint').textContent='Говорите спокойно. Фрагмент '+(segs.length+1);
+    $('#recPause').textContent='⏸ Пауза';
+    if(script.trim()){ $('#prompter').textContent=script; $('#prompterWrap').classList.remove('hidden'); }
+  }).catch(function(e){ micError(e); });
+}
+function micError(e){
+  var el=$('#micErr'); el.classList.remove('hidden');
+  var inFrame = (window.self!==window.top);
+  el.innerHTML = 'Микрофон недоступен'+(e&&e.name==='NotAllowedError'?' — доступ запрещён. Разрешите микрофон в настройках браузера для этого сайта.':'.')+
+    (inFrame?' В окне предпросмотра Claude запись с микрофона заблокирована — откройте студию на своём сайте или загрузите запись файлом (кнопка «Загрузить аудиофайлы»).':' Можно записать медитацию в диктофон телефона и загрузить файлом.');
+}
+function tick(){ var ms=recAcc+(rec&&rec.state==='recording'?Date.now()-recT0:0); $('#recTime').textContent=fmt(ms/1000).padStart(5,'0'); }
+function stopRec(save){
+  if(!rec) return;
+  var r=rec; rec=null;
+  r.onstop=function(){
+    recStream.getTracks().forEach(function(t){t.stop();});
+    cancelAnimationFrame(meterRaf); clearInterval(recTimer); $('#meterBar').style.width='0';
+    $('#recBtn').classList.remove('on'); $('#recBtn').textContent='Запись'; $('#recCtl').classList.add('hidden');
+    $('#recHint').textContent='Нажмите, чтобы начать запись фрагмента'; $('#recTime').textContent='00:00';
+    $('#prompterWrap').classList.add('hidden');
+    if(save&&recChunks.length){ var blob=new Blob(recChunks,{type:r.mimeType||recMime||'audio/webm'}); addSegment(blob,'Фрагмент '+(segs.length+1)).then(function(){ toast('Фрагмент сохранён'); }); }
+  };
+  try{ r.stop(); }catch(e){ r.onstop(); }
+}
+
+/* ---------- список фрагментов ---------- */
+var segAudio=null;
+function renderSegs(){
+  var el=$('#segList');
+  if(!segs.length){ el.innerHTML='<p class="muted small">Пока нет фрагментов. Запишите голос или загрузите готовую запись (например, из диктофона телефона).</p>'; $('#voiceTotal').textContent=''; return; }
+  el.innerHTML=segs.map(function(g,i){
+    return '<div class="seg" data-id="'+g.id+'"><div class="n">'+(i+1)+'</div><div><input type="text" class="sname" value="'+esc(g.name)+'">'+
+      '<div class="meta"><span>'+(g.loading?'обработка…':fmt(g.dur))+'</span><span>пауза после <input type="number" class="spause" min="0" max="600" step="1" value="'+(g.pause)+'"> с</span></div></div>'+
+      '<div class="acts"><button class="iconb mini splay" title="Прослушать">▶</button><button class="iconb mini sup" title="Выше" '+(i?'':'disabled')+'>↑</button><button class="iconb mini sdown" title="Ниже" '+(i<segs.length-1?'':'disabled')+'>↓</button><button class="iconb mini danger sdel" title="Удалить">✕</button></div></div>';
+  }).join('');
+  var tot=0; segs.forEach(function(g){ tot+=g.dur+(+g.pause||0); });
+  $('#voiceTotal').textContent='Голос с паузами: '+fmt(tot);
+}
+$('#segList').addEventListener('click',function(e){
+  var row=e.target.closest('.seg'); if(!row) return; var id=row.dataset.id, i=segs.findIndex(function(g){return g.id===id;}), g=segs[i];
+  if(e.target.closest('.splay')){
+    if(segAudio){ segAudio.pause(); var was=segAudio._id; segAudio=null; if(was===id){ e.target.textContent='▶'; return; } document.querySelectorAll('.splay').forEach(function(b){b.textContent='▶';}); }
+    segAudio=new Audio(URL.createObjectURL(g.blob)); segAudio._id=id; segAudio.play().catch(function(){}); e.target.textContent='■';
+    var btn=e.target; segAudio.onended=function(){ btn.textContent='▶'; segAudio=null; };
+  } else if(e.target.closest('.sup')&&i>0){ segs.splice(i-1,0,segs.splice(i,1)[0]); renderSegs(); updateInfo(); saveDraft(); }
+  else if(e.target.closest('.sdown')&&i<segs.length-1){ segs.splice(i+1,0,segs.splice(i,1)[0]); renderSegs(); updateInfo(); saveDraft(); }
+  else if(e.target.closest('.sdel')){
+    var b=e.target.closest('.sdel');
+    if(!b.dataset.arm){ b.dataset.arm='1'; b.textContent='?'; b.title='Нажмите ещё раз, чтобы удалить'; toast('Нажмите ✕ ещё раз, чтобы удалить фрагмент'); setTimeout(function(){ if(b.isConnected){ delete b.dataset.arm; b.textContent='✕'; } },3500); return; }
+    segs.splice(i,1); worker.postMessage({cmd:'dropVoice',id:id}); renderSegs(); updateInfo(); saveDraft();
+  }
+});
+$('#segList').addEventListener('input',function(e){
+  var row=e.target.closest('.seg'); if(!row) return; var g=segs.find(function(x){return x.id===row.dataset.id;});
+  if(e.target.classList.contains('sname')) g.name=e.target.value;
+  if(e.target.classList.contains('spause')){ g.pause=Math.max(0,Math.min(600,+e.target.value||0)); updateInfo(); var tot=0; segs.forEach(function(x){ tot+=x.dur+(+x.pause||0); }); $('#voiceTotal').textContent='Голос с паузами: '+fmt(tot); }
+  saveDraft();
+});
+
+/* ---------- настройки (ползунки) ---------- */
+var SL = {
+  padVol:function(v){return v+'%';}, bowlVol:function(v){return v+'%';}, oceanVol:function(v){return v+'%';}, rainVol:function(v){return v+'%';}, binVol:function(v){return v+'%';}, customVol:function(v){return v+'%';},
+  bowlEvery:function(v){return v+' с';}, intro:function(v){return v+' с';}, outro:function(v){return v>=60?fmt(v):v+' с';}, minTotal:function(v){return v?v+' мин':'—';},
+  fadeIn:function(v){return v+' с';}, fadeOut:function(v){return v+' с';}, voiceDb:function(v){return (v>0?'+':'')+v+' дБ';}, musicDb:function(v){return v+' дБ';},
+  duckDb:function(v){return v?'−'+v+' дБ':'нет';}, reverb:function(v){return v+'%';}
+};
+function bindSettings(){
+  Object.keys(SL).forEach(function(k){
+    var el=$('#'+k), vv=$('#'+k+'V'); el.value=S[k]; vv.textContent=SL[k](+S[k]);
+    el.oninput=function(){ S[k]=+el.value; vv.textContent=SL[k](S[k]); if(['intro','outro','minTotal'].indexOf(k)>=0) updateInfo(); saveDraft(); };
+  });
+  ['mood','tuning','binType','kbps'].forEach(function(k){ var el=$('#'+k); el.value=String(S[k]); el.onchange=function(){ S[k]=(k==='tuning'||k==='kbps')?+el.value:el.value; saveDraft(); }; });
+  ['comp','gate','trim','noiseSup'].forEach(function(k){ var el=$('#'+k); el.checked=!!S[k]; el.onchange=function(){ S[k]=el.checked; saveDraft(); }; });
+}
+$('#presets').innerHTML=PRESETS.map(function(p,i){ return '<button data-i="'+i+'">'+p[0]+'</button>'; }).join('');
+$('#presets').onclick=function(e){ var b=e.target.closest('button'); if(!b) return; Object.assign(S,PRESETS[+b.dataset.i][1]); bindSettings(); updateInfo(); saveDraft(); toast('Шаблон «'+PRESETS[+b.dataset.i][0].replace(/^\S+\s/,'')+'» применён'); };
+
+/* ---------- таймлайн и итог ---------- */
+function totals(){
+  var t=S.intro, parts=[{k:'m',d:S.intro}];
+  segs.forEach(function(g){ parts.push({k:'v',d:g.dur}); if(+g.pause) parts.push({k:'p',d:+g.pause}); t+=g.dur+(+g.pause||0); });
+  var voiceEnd=t, total=Math.max(t+S.outro, S.minTotal*60); parts.push({k:'m',d:total-voiceEnd});
+  return {total:total, voice:segs.reduce(function(a,g){return a+g.dur;},0), parts:parts};
+}
+function updateInfo(){
+  var T=totals(); $('#totDur').textContent=fmt(T.total); $('#totVoice').textContent=fmt(T.voice); $('#totSegs').textContent=segs.length;
+  if(prevAt>T.total) prevAt=Math.max(0,T.total-60);
+  var html=T.parts.map(function(p){ return '<div class="tl-'+p.k+'" style="width:'+(p.d/T.total*100)+'%"></div>'; }).join('');
+  $('#timeline').innerHTML=html+'<span class="tl-cursor" style="left:'+(prevAt/T.total*100)+'%"></span>';
+  $('#prevAt').textContent=fmt(prevAt);
+}
+$('#timeline').onclick=function(e){ var r=this.getBoundingClientRect(); prevAt=Math.max(0,(e.clientX-r.left)/r.width*totals().total); updateInfo(); saveDraft(); };
+
+/* ---------- прослушивание ---------- */
+var pSrc=null, busy=false;
+function stopPlay(){ if(pSrc){ try{pSrc.stop();}catch(e){} pSrc=null; } $('#prevStop').classList.add('hidden'); $('#musicStop').classList.add('hidden'); $('#prevStatus').textContent=''; }
+function playLR(L,R,stopBtn){
+  var a=getAC(); stopPlay();
+  var b=a.createBuffer(2,L.length,SR); b.getChannelData(0).set(L); b.getChannelData(1).set(R);
+  pSrc=a.createBufferSource(); pSrc.buffer=b; pSrc.connect(a.destination); pSrc.start();
+  var me=pSrc; pSrc.onended=function(){ if(pSrc===me) stopPlay(); };
+  $(stopBtn).classList.remove('hidden');
+}
+function preview(opts, stopBtn, statusEl){
+  if(busy){ toast('Подождите — идёт обработка'); return; }
+  getAC(); busy=true; stopPlay();
+  if(statusEl) statusEl.textContent='Готовлю звук…';
+  var st=Object.assign({},S,opts.st||{});
+  runJob({cmd:'render',mode:'preview',settings:st,order:opts.noVoice?[]:order(),from:opts.from||0,len:opts.len}, function(p){ if(statusEl) statusEl.textContent='Готовлю звук… '+Math.round(p*100)+'%'; })
+    .then(function(m){ busy=false; playLR(m.L,m.R,stopBtn); if(statusEl) statusEl.textContent='Играет'; })
+    .catch(function(e){ busy=false; if(statusEl) statusEl.textContent=''; toast('Ошибка: '+e.message); });
+}
+$('#prevBtn').onclick=function(){ if(!segs.length) toast('Голоса пока нет — прозвучит только музыка'); preview({from:prevAt,len:60},'#prevStop',$('#prevStatus')); };
+$('#prevStop').onclick=stopPlay; $('#musicStop').onclick=stopPlay;
+$('#musicPrev').onclick=function(){ preview({noVoice:true,from:0,len:30,st:{minTotal:1,intro:0,fadeIn:3,fadeOut:3,outro:30}},'#musicStop',null); };
+
+/* ---------- экспорт ---------- */
+var wakeLock=null, exporting=false;
+$('#mCat').innerHTML=CATS.map(function(c){return '<option>'+c+'</option>';}).join('');
+$('#exportBtn').onclick=function(){
+  if(busy){ toast('Подождите — идёт обработка'); return; }
+  if(!segs.length){ toast('Сначала запишите или загрузите голос'); document.querySelector('[data-tab=voice]').click(); return; }
+  if(segs.some(function(g){return g.loading;})){ toast('Фрагменты ещё обрабатываются'); return; }
+  var title=$('#mTitle').value.trim()||'Медитация', T=totals();
+  busy=true; exporting=true; stopPlay();
+  $('#exportBtn').disabled=true; $('#exportCancel').classList.remove('hidden'); $('#exportProg').classList.remove('hidden'); $('#exportDone').classList.add('hidden');
+  $('#exportBar').style.width='0'; var t0=Date.now();
+  try{ if(navigator.wakeLock) navigator.wakeLock.request('screen').then(function(w){wakeLock=w;}).catch(function(){}); }catch(e){}
+  runJob({cmd:'render',mode:'export',settings:Object.assign({},S),order:order(),from:0,kbps:S.kbps}, function(p){
+    $('#exportBar').style.width=(p*100)+'%';
+    var el=(Date.now()-t0)/1000, eta=p>0.02?el/p-el:0;
+    $('#exportTxt').textContent='Создаю медитацию… '+Math.round(p*100)+'%'+(eta?' · осталось ≈ '+fmt(eta):'');
+  }).then(function(m){
+    var item={id:uid(),title:title,category:$('#mCat').value,client:$('#mClient').value.trim(),desc:$('#mDesc').value.trim(),duration:m.info.total,created:Date.now(),size:m.blob.size,kbps:S.kbps,blob:m.blob,
+      music:{mood:S.mood,tuning:S.tuning}};
+    return libPut(item).then(function(){ return item; });
+  }).then(function(item){
+    finishExport(); renderLib();
+    var url=URL.createObjectURL(item.blob);
+    $('#exportDone').innerHTML='<div class="item"><div class="t">✓ '+esc(item.title)+'</div><div class="small muted">'+fmt(item.duration)+' · '+(item.size/1048576).toFixed(1)+' МБ · сохранено в библиотеку</div><audio controls src="'+url+'"></audio><div class="row" style="margin-top:8px"><button class="primary" id="dDl">⬇ Скачать MP3</button>'+(canShare()?'<button id="dSh">📤 Отправить</button>':'')+'</div></div>';
+    $('#exportDone').classList.remove('hidden');
+    $('#dDl').onclick=function(){ downloadItem(item); };
+    if($('#dSh')) $('#dSh').onclick=function(){ shareItem(item); };
+    toast('Медитация готова');
+  }).catch(function(e){ finishExport(); if(e&&e.message!=='cancel') toast('Ошибка: '+(e&&e.message)); });
+};
+function finishExport(){
+  busy=false; exporting=false; $('#exportBtn').disabled=false; $('#exportCancel').classList.add('hidden'); $('#exportProg').classList.add('hidden');
+  if(wakeLock){ try{wakeLock.release();}catch(e){} wakeLock=null; }
+}
+$('#exportCancel').onclick=function(){
+  worker.terminate(); Object.keys(jobs).forEach(function(k){ jobs[k].reject(new Error('cancel')); delete jobs[k]; });
+  makeWorker(); reloadAll(); finishExport(); toast('Создание остановлено');
+};
+function reloadAll(){
+  var p=segs.map(function(g){ g.loading=true; return loadSeg(g).then(function(){ g.loading=false; }); });
+  if(customBlob) p.push(loadCustom(customBlob));
+  renderSegs();
+  return Promise.all(p).then(function(){ renderSegs(); updateInfo(); }).catch(function(e){ renderSegs(); toast('Не удалось загрузить часть аудио'); });
+}
+
+/* ---------- скачивание / отправка ---------- */
+var dlP=null;
+function downloadsCap(){
+  if(dlP) return dlP;
+  dlP = (window.claude && typeof window.claude.use==='function')
+    ? Promise.race([window.claude.use('downloads'), new Promise(function(r){ setTimeout(function(){r(null);},10000); })]).catch(function(){return null;})
+    : Promise.resolve(null);
+  return dlP;
+}
+function saveFile(blob, filename){
+  return downloadsCap().then(function(dl){
+    if(dl){
+      var p = /\.zip$/i.test(filename) ? Promise.resolve({blob:blob,name:filename}) : zipFiles([{name:filename,blob:blob}]).then(function(z){ return {blob:z,name:filename.replace(/\.[^.]+$/,'')+'.zip'}; });
+      return p.then(function(o){ return dl.save({filename:o.name,data:o.blob}); }).then(function(){ toast('Файл сохранён'); }).catch(function(e){ if(e&&e.code!=='declined') toast('Не удалось сохранить: '+(e&&(e.message||e.code))); });
+    }
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },60000);
+  });
+}
+function fileName(it){ return slug(it.title+(it.client?' — '+it.client:''))+'.mp3'; }
+function downloadItem(it){ saveFile(it.blob, fileName(it)); }
+function canShare(){ try{ return !!(navigator.canShare && navigator.canShare({files:[new File([new Blob(['x'])],'a.mp3',{type:'audio/mpeg'})]})); }catch(e){ return false; } }
+function shareItem(it){
+  var f=new File([it.blob],fileName(it),{type:'audio/mpeg'});
+  navigator.share({files:[f],title:it.title,text:it.title+(it.desc?'\n\n'+it.desc:'')}).catch(function(e){ if(e&&e.name!=='AbortError') toast('Отправка недоступна: '+e.message); });
+}
+
+/* ---------- ZIP (без сжатия) ---------- */
+var CRC=(function(){ var t=new Uint32Array(256); for(var n=0;n<256;n++){ var c=n; for(var k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(u){ var c=0xFFFFFFFF; for(var i=0;i<u.length;i++) c=CRC[(c^u[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function zipFiles(files){
+  var enc=new TextEncoder(), parts=[], central=[], off=0;
+  return files.reduce(function(p,f){ return p.then(function(){
+    return (f.blob.arrayBuffer?f.blob.arrayBuffer():new Response(f.blob).arrayBuffer()).then(function(ab){
+      var data=new Uint8Array(ab), name=enc.encode(f.name), crc=crc32(data);
+      var h=new DataView(new ArrayBuffer(30)); h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(8,0,true);
+      h.setUint16(10,0,true); h.setUint16(12,0x21,true); h.setUint32(14,crc,true); h.setUint32(18,data.length,true); h.setUint32(22,data.length,true); h.setUint16(26,name.length,true); h.setUint16(28,0,true);
+      parts.push(h.buffer,name,f.blob);
+      var c=new DataView(new ArrayBuffer(46)); c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint16(10,0,true);
+      c.setUint16(12,0,true); c.setUint16(14,0x21,true); c.setUint32(16,crc,true); c.setUint32(20,data.length,true); c.setUint32(24,data.length,true); c.setUint16(28,name.length,true);
+      c.setUint32(42,off,true); central.push(c.buffer,name);
+      off+=30+name.length+data.length;
+    });
+  }); }, Promise.resolve()).then(function(){
+    var csz=central.reduce(function(a,b){return a+(b.byteLength);},0);
+    var e=new DataView(new ArrayBuffer(22)); e.setUint32(0,0x06054b50,true); e.setUint16(8,files.length,true); e.setUint16(10,files.length,true); e.setUint32(12,csz,true); e.setUint32(16,off,true);
+    return new Blob(parts.concat(central,[e.buffer]),{type:'application/zip'});
+  });
+}
+function unzip(blob){
+  return blob.arrayBuffer().then(function(ab){
+    var v=new DataView(ab), u=new Uint8Array(ab), dec=new TextDecoder(), out={}, p=0;
+    while(p+30<=u.length && v.getUint32(p,true)===0x04034b50){
+      var method=v.getUint16(p+8,true), sz=v.getUint32(p+18,true), nl=v.getUint16(p+26,true), xl=v.getUint16(p+28,true);
+      var name=dec.decode(u.subarray(p+30,p+30+nl)), st=p+30+nl+xl;
+      if(method!==0) throw new Error('архив сжат другой программой — загрузите архив, скачанный из студии');
+      out[name]=new Blob([u.subarray(st,st+sz)]); p=st+sz;
+    }
+    return out;
+  });
+}
+
+/* ---------- библиотека ---------- */
+var libFilter='Все', libItems=[], libUrls=[];
+function renderLib(){
+  return libAll().then(function(items){
+    libItems=items.sort(function(a,b){return b.created-a.created;});
+    var used=['Все'].concat(CATS.filter(function(c){ return libItems.some(function(i){return i.category===c;}); }));
+    if(used.indexOf(libFilter)<0) libFilter='Все';
+    $('#libChips').innerHTML=used.length>1?used.map(function(c){ return '<span class="chip'+(c===libFilter?' on':'')+'" data-c="'+esc(c)+'">'+esc(c)+'</span>'; }).join(''):'';
+    var q=$('#libSearch').value.trim().toLowerCase();
+    var list=libItems.filter(function(i){ return (libFilter==='Все'||i.category===libFilter) && (!q || (i.title+' '+(i.client||'')+' '+(i.desc||'')).toLowerCase().indexOf(q)>=0); });
+    $('#libCount').textContent=libItems.length?libItems.length+' шт. · '+(libItems.reduce(function(a,i){return a+i.size;},0)/1048576).toFixed(0)+' МБ':'';
+    libUrls.forEach(URL.revokeObjectURL); libUrls=[];
+    var share=canShare();
+    $('#libList').innerHTML=list.length?list.map(function(i){
+      return '<div class="item" data-id="'+i.id+'"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><div class="t">'+esc(i.title)+'</div>'+
+        '<div class="small muted">'+fmt(i.duration)+' · '+(i.size/1048576).toFixed(1)+' МБ · '+new Date(i.created).toLocaleDateString('ru-RU')+'</div></div><span class="pill">'+esc(i.category)+'</span></div>'+
+        (i.client?'<div class="small" style="margin-top:6px">👤 '+esc(i.client)+'</div>':'')+
+        (i.desc?'<div class="small muted" style="margin-top:6px;white-space:pre-wrap">'+esc(i.desc)+'</div>':'')+
+        '<div class="lplayer"></div>'+
+        '<div class="row" style="margin-top:10px;gap:6px"><button class="mini lplay">▶ Слушать</button><button class="mini ldl">⬇ MP3</button>'+(share?'<button class="mini lsh">📤 Отправить</button>':'')+
+        '<button class="mini ghost ledit">✎ Изменить</button><button class="mini ghost danger ldel">Удалить</button></div><div class="ledform"></div></div>';
+    }).join(''):'<p class="muted small">'+(libItems.length?'Ничего не найдено.':'Здесь появятся готовые медитации. Создайте первую во вкладке «Сведение».')+'</p>';
+  });
+}
+$('#libChips').onclick=function(e){ var c=e.target.closest('.chip'); if(!c) return; libFilter=c.dataset.c; renderLib(); };
+$('#libSearch').oninput=function(){ renderLib(); };
+$('#libList').addEventListener('click',function(e){
+  var card=e.target.closest('.item'); if(!card) return; var it=libItems.find(function(i){return i.id===card.dataset.id;}); if(!it) return;
+  if(e.target.closest('.lplay')){ var u=URL.createObjectURL(it.blob); libUrls.push(u); card.querySelector('.lplayer').innerHTML='<audio controls autoplay src="'+u+'"></audio>'; e.target.closest('.lplay').remove(); }
+  else if(e.target.closest('.ldl')) downloadItem(it);
+  else if(e.target.closest('.lsh')) shareItem(it);
+  else if(e.target.closest('.ldel')){
+    var b=e.target.closest('.ldel'); if(!b.dataset.arm){ b.dataset.arm='1'; b.textContent='Точно удалить?'; setTimeout(function(){ if(b.isConnected){ delete b.dataset.arm; b.textContent='Удалить'; } },4000); return; }
+    libDel(it.id).then(renderLib).then(function(){ toast('Удалено'); });
+  }
+  else if(e.target.closest('.ledit')){
+    var f=card.querySelector('.ledform');
+    if(f.innerHTML){ f.innerHTML=''; return; }
+    f.innerHTML='<div class="grid2" style="margin-top:12px"><div><label class="f">Название</label><input type="text" class="eT" value="'+esc(it.title)+'"></div><div><label class="f">Раздел</label><select class="eC">'+CATS.map(function(c){return '<option'+(c===it.category?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div><div><label class="f">Для клиента</label><input type="text" class="eK" value="'+esc(it.client)+'"></div></div><div style="margin-top:10px"><label class="f">Описание</label><textarea class="eD" style="min-height:70px">'+esc(it.desc)+'</textarea></div><div class="row" style="margin-top:10px"><button class="primary mini eS">Сохранить</button></div>';
+  }
+  else if(e.target.closest('.eS')){
+    it.title=card.querySelector('.eT').value.trim()||it.title; it.category=card.querySelector('.eC').value; it.client=card.querySelector('.eK').value.trim(); it.desc=card.querySelector('.eD').value.trim();
+    libPut(it).then(renderLib).then(function(){ toast('Сохранено'); });
+  }
+});
+$('#backupBtn').onclick=function(){
+  libAll().then(function(items){
+    if(!items.length){ toast('Библиотека пуста'); return; }
+    toast('Собираю архив…');
+    var meta=items.map(function(i,k){ var o=Object.assign({},i); delete o.blob; o.file=String(k+1).padStart(3,'0')+' '+slug(i.title)+'.mp3'; return o; });
+    var files=[{name:'library.json',blob:new Blob([JSON.stringify(meta,null,1)],{type:'application/json'})}].concat(items.map(function(i,k){ return {name:meta[k].file,blob:i.blob}; }));
+    return zipFiles(files).then(function(z){ return saveFile(z,'Медитации — архив '+new Date().toISOString().slice(0,10)+'.zip'); });
+  }).catch(function(e){ toast('Ошибка: '+e.message); });
+};
+$('#restoreFile').onchange=function(){
+  var f=this.files[0]; this.value=''; if(!f) return;
+  unzip(f).then(function(files){
+    if(!files['library.json']) throw new Error('в архиве нет library.json');
+    return files['library.json'].text().then(function(t){
+      var meta=JSON.parse(t), n=0;
+      return meta.reduce(function(p,m){ return p.then(function(){ var b=files[m.file]; if(!b) return; var it=Object.assign({},m); delete it.file; it.blob=new Blob([b],{type:'audio/mpeg'}); n++; return libPut(it); }); },Promise.resolve()).then(function(){ return n; });
+    });
+  }).then(function(n){ renderLib(); toast('Загружено медитаций: '+n); }).catch(function(e){ toast('Не удалось загрузить: '+e.message); });
+};
+$('#newProject').onclick=function(){
+  var b=this; if(!b.dataset.arm){ b.dataset.arm='1'; b.textContent='Нажмите ещё раз для подтверждения'; setTimeout(function(){ delete b.dataset.arm; b.textContent='Начать новую медитацию'; },4000); return; }
+  delete b.dataset.arm; b.textContent='Начать новую медитацию';
+  segs.forEach(function(g){ worker.postMessage({cmd:'dropVoice',id:g.id}); }); segs=[]; script=''; $('#script').value=''; customBlob=null; customName=''; worker.postMessage({cmd:'custom',data:null});
+  $('#customName').textContent='Не выбрано'; $('#customDel').classList.add('hidden'); prevAt=0;
+  ['#mTitle','#mClient','#mDesc'].forEach(function(s){ $(s).value=''; });
+  renderSegs(); updateInfo(); saveDraft(); toast('Новый проект'); document.querySelector('[data-tab=voice]').click();
+};
+
+/* ---------- прочие обработчики ---------- */
+document.querySelectorAll('.tab').forEach(function(t){ t.onclick=function(){
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x===t);});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+t.dataset.tab);});
+  if(t.dataset.tab==='library') renderLib(); if(t.dataset.tab==='mix') updateInfo();
+  window.scrollTo({top:0,behavior:'smooth'});
+}; });
+$('#recBtn').onclick=function(){ if(!rec) startRec(); };
+$('#recStop').onclick=function(){ stopRec(true); };
+$('#recCancel').onclick=function(){ stopRec(false); };
+$('#recPause').onclick=function(){ if(!rec) return; if(rec.state==='recording'){ rec.pause(); recAcc+=Date.now()-recT0; this.textContent='⏺ Продолжить'; } else { rec.resume(); recT0=Date.now(); this.textContent='⏸ Пауза'; } };
+$('#fsMinus').onclick=function(){ S.fs=Math.max(16,S.fs-2); $('#prompter').style.fontSize=S.fs+'px'; saveDraft(); };
+$('#fsPlus').onclick=function(){ S.fs=Math.min(48,S.fs+2); $('#prompter').style.fontSize=S.fs+'px'; saveDraft(); };
+$('#script').oninput=function(){ script=this.value; saveDraft(); };
+$('#voiceFiles').onchange=function(){ var fs=[].slice.call(this.files); this.value=''; fs.reduce(function(p,f){ return p.then(function(){ return addSegment(f, f.name.replace(/\.[^.]+$/,'')); }); },Promise.resolve()); };
+$('#customFile').onchange=function(){
+  var f=this.files[0]; this.value=''; if(!f) return; toast('Загружаю дорожку…');
+  loadCustom(f).then(function(d){ customBlob=f; customName=f.name; $('#customName').textContent=f.name+' · '+fmt(d); $('#customDel').classList.remove('hidden'); saveDraft(); toast('Дорожка добавлена'); })
+    .catch(function(){ toast('Не удалось прочитать файл'); });
+};
+$('#customDel').onclick=function(){ customBlob=null; customName=''; worker.postMessage({cmd:'custom',data:null}); $('#customName').textContent='Не выбрано'; this.classList.add('hidden'); saveDraft(); };
+window.addEventListener('beforeunload',function(e){ if(exporting||rec){ e.preventDefault(); e.returnValue=''; } });
+
+/* ---------- запуск ---------- */
+try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+try{ if('serviceWorker' in navigator && location.protocol==='https:' && window.self===window.top) navigator.serviceWorker.register('sw.js').catch(function(){}); }catch(e){}
+makeWorker();
+kvGet('draft').then(function(d){
+  if(d){
+    Object.assign(S,d.settings||{}); script=d.script||''; prevAt=d.prevAt||0;
+    segs=(d.segs||[]).filter(function(g){return g.blob;}).map(function(g){ return {id:g.id,name:g.name,pause:g.pause,blob:g.blob,dur:g.dur||0}; });
+    customBlob=d.customBlob||null; customName=d.customName||'';
+    if(customBlob){ $('#customName').textContent=customName; $('#customDel').classList.remove('hidden'); }
+  }
+  $('#script').value=script; $('#prompter').style.fontSize=S.fs+'px';
+  bindSettings(); renderSegs(); updateInfo(); micList();
+  if(segs.length||customBlob) reloadAll();
+  renderLib();
+});
+})();
+</script>
+</body>
+</html>
