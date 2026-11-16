@@ -26,7 +26,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const r = e.request, u = new URL(r.url);
   if (r.method !== 'GET' || u.origin !== location.origin || u.pathname.includes('/api/')) return;
-  const isPage = r.mode === 'navigate' || /\/(index\.html)?$/.test(u.pathname) && u.pathname.startsWith(new URL('./', self.registration.scope).pathname) && !/\.[a-z0-9]+$/i.test(u.pathname.replace(/index\.html$/, ''));
+  const scope = new URL(self.registration.scope).pathname;
+  const isPage = r.mode === 'navigate' || u.pathname === scope || u.pathname === scope + 'index.html';
   const key = isPage ? './' : r;
   e.respondWith((async () => {
     try {
