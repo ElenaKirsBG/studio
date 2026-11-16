@@ -94,6 +94,9 @@ details.help[open] summary{margin-bottom:4px}
 .tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
 .tbl th{background:#efe4d7}
 .playbar{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 10px;box-shadow:0 8px 28px rgba(90,60,40,.18);z-index:6}
+.jump{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.jump a{font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 11px}
+.card[id^=sec]{scroll-margin-top:70px}
 .timeline{display:flex;height:34px;border-radius:10px;overflow:hidden;background:#efe4d7;cursor:pointer;position:relative;margin:10px 0 4px}
 .timeline div{height:100%}
 .tl-m{background:repeating-linear-gradient(45deg,#e3d3c2,#e3d3c2 6px,#eadccd 6px,#eadccd 12px)}
@@ -225,8 +228,9 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       <div class="presets" id="presets" style="margin-top:10px"></div>
       <div class="nowbox" id="nowBox"></div>
     </div>
+    <div class="jump"><span class="small muted">Перейти:</span><a href="#secBase">🎹 Основа</a><a href="#secInst">🔔 Инструменты</a><a href="#secNat">🌿 Природа</a><a href="#secBin">🎧 Бинауральные ритмы</a><a href="#secOwn">📁 Своя дорожка</a></div>
 
-    <div class="card">
+    <div class="card" id="secBase">
       <h3>1. Основа — гармония и тембр</h3>
       <div class="grid2">
         <div><label class="f">Настроение гармонии</label>
@@ -282,7 +286,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       </details>
     </div>
 
-    <div class="card">
+    <div class="card" id="secInst">
       <h3>2. Инструменты</h3>
       <div class="sl"><label>Мелодия</label><input type="range" id="melVol" min="0" max="100"><span class="v" id="melVolV"></span></div>
       <div class="grid2">
@@ -316,7 +320,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       </details>
     </div>
 
-    <div class="card">
+    <div class="card" id="secNat">
       <h3>3. Природа</h3>
       <div class="sl"><label>🌊 Море (волны)</label><input type="range" id="oceanVol" min="0" max="100"><span class="v" id="oceanVolV"></span></div>
       <div class="sl"><label>🌧 Дождь</label><input type="range" id="rainVol" min="0" max="100"><span class="v" id="rainVolV"></span></div>
@@ -348,9 +352,10 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       </details>
     </div>
 
-    <div class="card">
-      <h3>4. Частоты: ритмы мозга и тоны</h3>
-      <div class="sl"><label>Ритмы мозга</label><input type="range" id="binVol" min="0" max="100"><span class="v" id="binVolV"></span></div>
+    <div class="card" id="secBin">
+      <h3>4. 🎧 Бинауральные ритмы и частоты</h3>
+      <div class="note small" style="margin-bottom:10px"><b>Коротко:</b> бинауральные ритмы — едва слышный ровный тон, который мягко помогает мозгу перейти в нужное состояние (сон, глубокая медитация, расслабление). <b>Как включить:</b> поставьте ползунок «Бинауральные ритмы» на 10–18%, выберите состояние в списке «Частота ритма» и оставьте «Бинауральные» и «Плавный вход». Слушать — в наушниках. Подробности — в «❓» внизу этого блока.</div>
+      <div class="sl"><label>🎧 Бинауральные ритмы</label><input type="range" id="binVol" min="0" max="100"><span class="v" id="binVolV"></span></div>
       <div class="grid2">
         <div><label class="f">Частота ритма (на какое состояние)</label>
           <select id="binType">
@@ -394,7 +399,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
           <option value="963">963 Гц — единство, высшее «Я»</option>
         </select></div>
       <details class="help">
-        <summary>❓ Для чего герцы и ритмы, как их настраивать</summary>
+        <summary>❓ Бинауральные ритмы: для чего герцы, как выбрать и настроить</summary>
         <div class="hb">
           <p><b>Что такое Гц (герц).</b> Это «сколько раз в секунду». У звука это высота тона: 100 Гц — низкий гул, 1000 Гц — высокий писк. Электрическая активность мозга тоже имеет ритмы, их тоже меряют в Гц, и у каждого состояния свой преобладающий ритм:</p>
           <table class="tbl">
@@ -430,7 +435,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       </details>
     </div>
 
-    <div class="card">
+    <div class="card" id="secOwn">
       <h3>Своя музыкальная дорожка</h3>
       <p class="muted small" style="margin-top:0">Можно добавить свой файл: он зациклится на всю длину медитации с плавными переходами и будет звучать вместе со слоями выше (выключите лишние слои, если нужна только ваша дорожка). <b>Для продажи используйте только музыку, на которую у вас есть лицензия</b> (собственная, купленная с правом коммерческого использования или royalty‑free с разрешением на продажу).</p>
       <div class="row">
@@ -2068,7 +2073,7 @@ var LAYERS = [
   ['oceanVol',function(){return 'Море';}],['rainVol',function(){return 'Дождь';}],['windVol',function(){return 'Ветер';}],['streamVol',function(){return 'Ручей';}],
   ['birdVol',function(){return 'Птицы';}],['cricketVol',function(){return 'Сверчки';}],['fireVol',function(){return 'Костёр';}],['brownVol',function(){return 'Мягкий шум';}],
   ['hbVol',function(){return 'Сердцебиение '+S.hbBpm+'/мин';}],['toneVol',function(){return 'Тон '+S.toneHz+' Гц';}],
-  ['binVol',function(){return optName('binType')+', '+optName('binMode').toLowerCase()+(S.binRamp&&['alpha','smr','beta'].indexOf(S.binType)<0?', плавный вход':'');}]
+  ['binVol',function(){return '🎧 '+optName('binType')+', '+optName('binMode').toLowerCase()+(S.binRamp&&['alpha','smr','beta'].indexOf(S.binType)<0?', плавный вход':'');}]
 ];
 function nowHtml(short){
   var st=presetState(), head;
