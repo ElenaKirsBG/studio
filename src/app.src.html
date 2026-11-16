@@ -467,40 +467,74 @@ function micList(){
     sel.value=cur;
   }).catch(function(){});
 }
+function getMic(dev){
+  // 1) качественная запись без обработки браузера; 2) обычные настройки; 3) просто микрофон по умолчанию
+  var md=navigator.mediaDevices, tries=[];
+  var hi={echoCancellation:false,noiseSuppression:!!S.noiseSup,autoGainControl:false,channelCount:1}; if(dev) hi.deviceId={exact:dev};
+  tries.push({audio:hi});
+  if(dev) tries.push({audio:{deviceId:dev}});
+  tries.push({audio:true});
+  var last=null;
+  return tries.reduce(function(p,c){ return p.catch(function(e){
+    if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError')) throw e;  // запрет — повтор не поможет
+    last=e; return md.getUserMedia(c);
+  }); }, Promise.reject({name:'start'})).catch(function(e){ throw (e&&e.name==='start')?last:e; });
+}
 function startRec(){
   $('#micErr').classList.add('hidden');
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){ micError(); return; }
+  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ micError({name:'NoSupport'}); return; }
+  if(!window.MediaRecorder){ micError({name:'NoRecorder'}); return; }
+  if(document.featurePolicy&&document.featurePolicy.allowsFeature&&!document.featurePolicy.allowsFeature('microphone')){ micError({name:'PolicyBlocked'}); return; }
   var dev=$('#micSel').value;
-  var c={echoCancellation:false,noiseSuppression:!!S.noiseSup,autoGainControl:false,channelCount:1};
-  if(dev) c.deviceId={exact:dev};
-  var actx=getAC();
-  navigator.mediaDevices.getUserMedia({audio:c}).then(function(stream){
+  var actx=null; try{ actx=getAC(); }catch(e){}
+  $('#recHint').textContent='Подключаю микрофон…';
+  getMic(dev).then(function(stream){
     recStream=stream; micList();
     var types=['audio/webm;codecs=opus','audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm','audio/ogg;codecs=opus'];
-    recMime=''; for(var i=0;i<types.length;i++){ if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(types[i])){ recMime=types[i]; break; } }
-    var o={audioBitsPerSecond:192000}; if(recMime) o.mimeType=recMime;
-    try{ rec=new MediaRecorder(stream,o); }catch(e){ rec=new MediaRecorder(stream); }
+    recMime=''; for(var i=0;i<types.length;i++){ try{ if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(types[i])){ recMime=types[i]; break; } }catch(e){} }
+    try{ rec=new MediaRecorder(stream, recMime?{mimeType:recMime,audioBitsPerSecond:192000}:{}); }
+    catch(e){ try{ rec=new MediaRecorder(stream); recMime=''; }catch(e2){ stream.getTracks().forEach(function(t){t.stop();}); throw {name:'NoRecorder',message:e2.message}; } }
     recChunks=[]; rec.ondataavailable=function(e){ if(e.data&&e.data.size) recChunks.push(e.data); };
     rec.start(1000);
     recT0=Date.now(); recAcc=0;
     recTimer=setInterval(tick,250);
-    var src=actx.createMediaStreamSource(stream), an=actx.createAnalyser(); an.fftSize=2048; src.connect(an);
-    var buf=new Float32Array(an.fftSize);
-    (function loop(){ an.getFloatTimeDomainData(buf); var p=0; for(var k=0;k<buf.length;k++){ var v=Math.abs(buf[k]); if(v>p) p=v; }
-      var db=20*Math.log10(p+1e-6), w=Math.max(0,Math.min(100,(db+60)/60*100)); $('#meterBar').style.width=w+'%';
-      if(p>0.97) $('#recHint').textContent='⚠ Слишком громко — отодвиньтесь от микрофона или уменьшите усиление';
-      meterRaf=requestAnimationFrame(loop); })();
+    try{
+      var src=actx.createMediaStreamSource(stream), an=actx.createAnalyser(); an.fftSize=2048; src.connect(an);
+      var buf=new Float32Array(an.fftSize);
+      (function loop(){ an.getFloatTimeDomainData(buf); var p=0; for(var k=0;k<buf.length;k++){ var v=Math.abs(buf[k]); if(v>p) p=v; }
+        var db=20*Math.log10(p+1e-6), w=Math.max(0,Math.min(100,(db+60)/60*100)); $('#meterBar').style.width=w+'%';
+        if(p>0.97) $('#recHint').textContent='⚠ Слишком громко — отодвиньтесь от микрофона или уменьшите усиление';
+        meterRaf=requestAnimationFrame(loop); })();
+    }catch(e){ /* без индикатора громкости запись всё равно идёт */ }
     $('#recBtn').classList.add('on'); $('#recBtn').textContent='Идёт запись';
     $('#recCtl').classList.remove('hidden'); $('#recHint').textContent='Говорите спокойно. Фрагмент '+(segs.length+1);
     $('#recPause').textContent='⏸ Пауза';
     if(script.trim()){ $('#prompter').textContent=script; $('#prompterWrap').classList.remove('hidden'); }
-  }).catch(function(e){ micError(e); });
+  }).catch(function(e){ $('#recHint').textContent='Нажмите, чтобы начать запись фрагмента'; micError(e); });
 }
 function micError(e){
   var el=$('#micErr'); el.classList.remove('hidden');
-  var inFrame = (window.self!==window.top);
-  el.innerHTML = 'Микрофон недоступен'+(e&&e.name==='NotAllowedError'?' — доступ запрещён. Разрешите микрофон в настройках браузера для этого сайта.':'.')+
-    (inFrame?' В окне предпросмотра Claude запись с микрофона заблокирована — откройте студию на своём сайте или загрузите запись файлом (кнопка «Загрузить аудиофайлы»).':' Можно записать медитацию в диктофон телефона и загрузить файлом.');
+  var name=(e&&e.name)||'Error', ua=navigator.userAgent;
+  var ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1), android=/Android/.test(ua), win=/Windows/.test(ua), mac=/Macintosh/.test(ua)&&!ios;
+  var inFrame=false; try{ inFrame=window.self!==window.top; }catch(x){ inFrame=true; }
+  var inApp=/Telegram|FBAN|FBAV|Instagram|WhatsApp|VK|YaBrowser\/.*Mobile/.test(ua);
+  var t;
+  if(inFrame) t='Студия открыта внутри другого окна (например, в Claude) — там запись с микрофона заблокирована. Откройте её напрямую: <b>elenakirsanova.com/meditations/studio/</b>.';
+  else if(inApp) t='Студия открыта во встроенном браузере мессенджера — он не даёт доступ к микрофону. Нажмите «⋯» → «Открыть в браузере» (Safari или Chrome).';
+  else if(name==='NotAllowedError'||name==='SecurityError'||name==='PolicyBlocked'){
+    t='<b>Доступ к микрофону запрещён.</b> ';
+    if(ios) t+='iPhone: <b>Настройки → Приложения → Safari → Микрофон → «Спросить» или «Разрешить»</b>. Если в Safari открыть страницу, нажать «аА» слева от адреса → «Настройки веб-сайта» → Микрофон → «Разрешить». Затем закройте студию и откройте снова.';
+    else if(android) t+='Android: нажмите значок настроек слева от адреса → Разрешения → Микрофон → Разрешить. Если не помогло: Настройки телефона → Приложения → Chrome → Разрешения → Микрофон → Разрешить.';
+    else { t+='Нажмите значок слева от адреса сайта (замок или ползунки) → Микрофон → <b>Разрешить</b>, затем обновите страницу.';
+      if(win) t+=' Если не помогло — Windows: Пуск → Параметры → Конфиденциальность и защита → <b>Микрофон</b>: включите «Доступ к микрофону» и «Разрешить классическим приложениям доступ к микрофону».';
+      if(mac) t+=' Если не помогло — macOS: Системные настройки → Конфиденциальность и безопасность → Микрофон → включите для вашего браузера.'; }
+  }
+  else if(name==='NotFoundError'||name==='OverconstrainedError'||name==='DevicesNotFoundError') t='<b>Микрофон не найден.</b> Проверьте, что он подключён (у внешнего — провод/USB до конца, у беспроводного — сопряжение), выберите «По умолчанию» в списке и попробуйте снова.'+(win?' В Windows проверьте: Параметры → Система → Звук → Ввод — микрофон должен быть выбран и не отключён.':'');
+  else if(name==='NotReadableError'||name==='TrackStartError'||name==='AbortError') t='<b>Микрофон занят или выключен системой.</b> Закройте программы, которые могут им пользоваться (Zoom, Телемост, звонок в Telegram/WhatsApp, диктофон, другие вкладки с записью), и попробуйте снова.'+(win?' В Windows также проверьте Параметры → Конфиденциальность и защита → Микрофон — доступ должен быть включён.':'');
+  else if(name==='NoSupport') t='Этот браузер не даёт записывать звук. Откройте студию в Safari (iPhone, Mac) или в Chrome / Edge (Android, Windows) по адресу <b>elenakirsanova.com/meditations/studio/</b>.';
+  else if(name==='NoRecorder') t='Браузер устарел и не умеет записывать звук. Обновите iOS / браузер или откройте студию в Chrome.';
+  else t='Не удалось включить микрофон.';
+  el.innerHTML=t+'<div class="small" style="margin-top:6px;opacity:.75">Можно записать медитацию в диктофон телефона и загрузить файлом (кнопка «Загрузить аудиофайлы»). Если не получается — пришлите Claude этот код: '+esc(name)+(e&&e.message?': '+esc(e.message):'')+'</div>';
 }
 function tick(){ var ms=recAcc+(rec&&rec.state==='recording'?Date.now()-recT0:0); $('#recTime').textContent=fmt(ms/1000).padStart(5,'0'); }
 function stopRec(save){
