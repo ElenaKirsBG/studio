@@ -1684,7 +1684,7 @@ if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typ
   self.onmessage = function (e) {
     var m = e.data;
     try {
-      if (m.cmd === 'voice') { VOICE[m.id] = m.nr ? denoise(m.data, m.nr) : m.data; return; }
+      if (m.cmd === 'voice') { var vd = m.data; if (m.nr) { try { vd = denoise(m.data, m.nr); } catch (er) { vd = m.data; } } VOICE[m.id] = vd; return; }
       if (m.cmd === 'dropVoice') { delete VOICE[m.id]; return; }
       if (m.cmd === 'custom') { CUSTOM = m.data; return; }
       if (m.cmd === 'info') { var tl = buildTimeline(m.settings, m.order); self.postMessage({ cmd: 'info', total: tl.total / SR, voiceEnd: tl.voiceEnd / SR, reqId: m.reqId }); return; }
@@ -1895,6 +1895,15 @@ function loadCustom(blob){
 
 /* ---------- запись ---------- */
 var rec=null, recStream=null, recChunks=[], recT0=0, recAcc=0, recTimer=null, meterRaf=null, ac=null, recMime='';
+// Для прослушивания — отдельный аудиоконтекст. Контекст, через который шла запись с микрофона,
+// на iPhone после записи и смены режима звука может «онеметь».
+var pac=null;
+function getPAC(){
+  var C=window.AudioContext||window.webkitAudioContext;
+  if(!pac||pac.state==='closed'){ pac=new C(); }
+  return pac;
+}
+function resetPAC(){ try{ if(pac) pac.close(); }catch(e){} pac=null; }
 function getAC(){ if(!ac){ var C=window.AudioContext||window.webkitAudioContext; ac=new C(); } if(ac.state==='suspended') ac.resume(); return ac; }
 function micList(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.enumerateDevices) return;
@@ -2017,7 +2026,7 @@ $('#segList').addEventListener('click',function(e){
   else if(e.target.closest('.sdel')){
     var b=e.target.closest('.sdel');
     if(!b.dataset.arm){ b.dataset.arm='1'; b.textContent='?'; b.title='Нажмите ещё раз, чтобы удалить'; toast('Нажмите ✕ ещё раз, чтобы удалить фрагмент'); setTimeout(function(){ if(b.isConnected){ delete b.dataset.arm; b.textContent='✕'; } },3500); return; }
-    segs.splice(i,1); worker.postMessage({cmd:'dropVoice',id:id}); renderSegs(); updateInfo(); saveDraft();
+    segs.splice(i,1); worker.postMessage({cmd:'dropVoice',id:id}); if(prevAt>totals().total-Math.max(8,S.fadeOut)) prevAt=0; renderSegs(); updateInfo(); saveDraft();
   }
 });
 $('#segList').addEventListener('input',function(e){
@@ -2199,15 +2208,17 @@ function streamStop(){
   $('#prevBtn').innerHTML='▶ Слушать с отметки <span id="prevAt">'+fmt(prevAt)+'</span>'; $('#prevBtn').classList.remove('danger');
   setSession('auto'); updateInfo();
 }
-function streamPlay(from){
+function streamPlay(from, retry){
   if(busy){ toast('Подождите — идёт обработка'); return; }
   if(segs.some(function(g){return g.loading;})){ toast('Фрагменты ещё обрабатываются'); return; }
   stopPlay(); streamStop();
-  var T=totals(); from=Math.max(0,Math.min(from,T.total-3));
+  var T=totals();
+  if(from>=T.total-Math.max(8,S.fadeOut)){ from=0; prevAt=0; updateInfo(); toast('Отметка стояла в самом конце, где музыка уже затихла, — слушаем с начала'); }
+  from=Math.max(0,Math.min(from,T.total-3));
   setSession('playback');
-  var ac=getAC(); try{ ac.resume(); }catch(e){}
+  var ac=getPAC(); try{ var pr=ac.resume(); if(pr&&pr.catch) pr.catch(function(){}); }catch(e){}
   var g=ac.createGain(); g.connect(ac.destination);
-  ST={sid:++sidN,ac:ac,gain:g,srcs:[],from:from,t0:0,next:0,total:T.total,req:false,done:false,timer:null};
+  ST={sid:++sidN,ac:ac,gain:g,srcs:[],from:from,t0:0,next:0,total:T.total,req:false,done:false,timer:null,ct0:ac.currentTime,tries:retry||0};
   $('#prevBtn').textContent='■ Остановить'; $('#prevBtn').classList.add('danger'); $('#prevStop').classList.remove('hidden');
   $('#prevStatus').textContent='Готовлю звук…';
   worker.postMessage({cmd:'streamStart',sid:ST.sid,settings:Object.assign({},S),order:order(),from:from,first:6});
@@ -2219,7 +2230,16 @@ function onStream(m){
     var b=ac.createBuffer(2,m.L.length,SR); b.getChannelData(0).set(m.L); b.getChannelData(1).set(m.R);
     var src=ac.createBufferSource(); src.buffer=b; src.connect(ST.gain);
     var now=ac.currentTime;
-    if(!ST.t0){ ST.t0=now+0.12; ST.next=ST.t0; ST.timer=setInterval(streamTick,400); }
+    if(!ST.t0){ ST.t0=now+0.12; ST.next=ST.t0; ST.timer=setInterval(streamTick,400);
+      var sidW=ST.sid, ct=now;
+      setTimeout(function(){
+        if(!ST||ST.sid!==sidW) return;
+        if(ST.ac.currentTime-ct<0.5){   // звук не пошёл: аудиосистема телефона «заснула» — пересоздаём и пробуем ещё раз
+          var at=ST.from, tr=ST.tries; streamStop(); resetPAC();
+          if(tr<1) streamPlay(at,tr+1); else toast('Телефон не даёт включить звук. Проверьте громкость и закройте/откройте студию.');
+        }
+      },2500);
+    }
     else if(ST.next<now+0.03){ var lag=now+0.08-ST.next; ST.t0+=lag; ST.next+=lag; }  // не успели подготовить — сдвигаем без щелчка
     src.start(ST.next); ST.next+=b.duration; ST.srcs.push(src);
     src.onended=function(){ if(ST){ var i=ST.srcs.indexOf(src); if(i>=0) ST.srcs.splice(i,1); } };
@@ -2329,7 +2349,7 @@ $('#exportCancel').onclick=function(){
   makeWorker(); reloadAll(); finishExport(); toast('Создание остановлено');
 };
 function reloadAll(){
-  var p=segs.map(function(g){ g.loading=true; return loadSeg(g).then(function(){ g.loading=false; }); });
+  var p=segs.map(function(g){ g.loading=true; return loadSeg(g).then(function(){ g.loading=false; },function(){ g.loading=false; g.err=true; toast('Фрагмент «'+(g.name||'')+'» не удалось прочитать — перезапишите его'); }); });
   if(customBlob) p.push(loadCustom(customBlob));
   renderSegs();
   return Promise.all(p).then(function(){ renderSegs(); updateInfo(); }).catch(function(e){ renderSegs(); toast('Не удалось загрузить часть аудио'); });

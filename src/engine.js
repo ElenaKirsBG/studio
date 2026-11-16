@@ -765,7 +765,7 @@ if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typ
   self.onmessage = function (e) {
     var m = e.data;
     try {
-      if (m.cmd === 'voice') { VOICE[m.id] = m.nr ? denoise(m.data, m.nr) : m.data; return; }
+      if (m.cmd === 'voice') { var vd = m.data; if (m.nr) { try { vd = denoise(m.data, m.nr); } catch (er) { vd = m.data; } } VOICE[m.id] = vd; return; }
       if (m.cmd === 'dropVoice') { delete VOICE[m.id]; return; }
       if (m.cmd === 'custom') { CUSTOM = m.data; return; }
       if (m.cmd === 'info') { var tl = buildTimeline(m.settings, m.order); self.postMessage({ cmd: 'info', total: tl.total / SR, voiceEnd: tl.voiceEnd / SR, reqId: m.reqId }); return; }
