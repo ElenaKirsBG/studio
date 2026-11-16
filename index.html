@@ -662,24 +662,32 @@ function buildTimeline(st, order) {
 /* огибающие голоса по кадрам 10 мс: для гейта и приглушения музыки */
 function voiceEnvelopes(tl, st) {
   var FR = 441, n = Math.ceil(tl.total / FR) + 2;
-  var rms = new Float32Array(n);
+  var rms = new Float32Array(n), gth = new Float32Array(n).fill(db2g(-52));
   for (var s = 0; s < tl.segs.length; s++) {
-    var sg = tl.segs[s], d = sg.data;
+    var sg = tl.segs[s], d = sg.data, loc = [];
     for (var j = 0; j < d.length; j += FR) {
       var sum = 0, e = Math.min(d.length, j + FR);
       for (var q = j; q < e; q++) sum += d[q] * d[q];
+      var fv = Math.sqrt(sum / (e - j)) * sg.gain; loc.push(fv);
       var fi = Math.floor((sg.start + j) / FR);
-      if (fi < n) rms[fi] = Math.max(rms[fi], Math.sqrt(sum / (e - j)) * sg.gain);
+      if (fi < n) rms[fi] = Math.max(rms[fi], fv);
     }
+    // Порог «тишины между фразами» — по фону именно этого фрагмента: у каждой записи свой шум комнаты,
+    // и после выравнивания громкости он разный. Так фон убирается одинаково во всех фрагментах.
+    var srt = loc.slice().sort(function (x, y) { return x - y; });
+    var noise = srt[Math.floor(srt.length * 0.1)] || 0, speech = srt[Math.floor(srt.length * 0.9)] || 0;
+    var t = Math.min(Math.max(noise * 3.2, db2g(-58)), Math.max(speech * 0.12, db2g(-58)));
+    var f0 = Math.floor(sg.start / FR), f1 = Math.min(n, Math.ceil((sg.start + d.length) / FR));
+    for (var ff = f0; ff < f1; ff++) gth[ff] = t;
   }
   var gate = new Float32Array(n), duck = new Float32Array(n);
-  var gThr = db2g(-52), act = new Float32Array(n);
+  var act = new Float32Array(n);
   var hold = 0, g = 0;
   for (var f = 0; f < n; f++) {
-    var on = rms[f] > gThr;
-    if (on) hold = 25; else if (hold > 0) hold--;
+    var on = rms[f] > gth[f];
+    if (on) hold = 30; else if (hold > 0) hold--;
     var target = (on || hold > 0) ? 1 : 0;
-    g += (target - g) * (target > g ? 0.8 : 0.06);
+    g += (target - g) * (target > g ? 0.7 : 0.03);
     gate[f] = g;
     act[f] = rms[f] > db2g(-42) ? 1 : 0;
   }
@@ -895,7 +903,7 @@ function* renderGen(msg) {
   var pv = st.padVol / 100, bv = st.bowlVol / 100, ov = st.oceanVol / 100, rv = st.rainVol / 100, nv = st.binVol / 100, cv = st.customVol / 100;
   var music = db2g(st.musicDb), voiceG = db2g(st.voiceDb), duckDepth = 1 - db2g(-st.duckDb);
   var wet = st.reverb / 100 * 1.1, dry = 1 - st.reverb / 100 * 0.25;
-  var gateFloor = st.gate ? db2g(-14) : 1;
+  var gateFloor = st.gate ? db2g(-22) : 1;
   var fi = st.fadeIn * SR, fo = st.fadeOut * SR;
   var thr = db2g(-20), ratio = 3, cenv = 0, ca = 1 - Math.exp(-1 / (0.005 * SR)), cr = 1 - Math.exp(-1 / (0.18 * SR)), makeup = db2g(7);
   var gsm = 0, dsm = 0;
@@ -1137,13 +1145,19 @@ function prepVoice(d, trim){
   var srt=Array.prototype.slice.call(r).sort(function(a,b){return a-b;});
   var ref=srt[Math.min(nF-1,Math.floor(nF*0.98))];
   if(!(ref>1e-5)) return d;
-  var thr=Math.max(ref*0.03, 0.0015);   // −30 дБ от опорного уровня
+  // Тишиной считаем только то, что близко к фону комнаты: тихие окончания фраз на выдохе и шёпот сохраняются.
+  var noise=srt[Math.floor(nF*0.1)];
+  var thr=Math.max(ref*0.006, Math.min(noise*2.5, ref*0.1), 0.0006);   // от −44 до −20 дБ от голоса
   if(trim){
     var a=0,b=nF-1; while(a<nF&&r[a]<thr) a++; while(b>a&&r[b]<thr) b--;
-    var st=Math.max(0,a*FR-Math.round(0.3*SR)), en=Math.min(d.length,(b+1)*FR+Math.round(0.6*SR));
+    if(a>=b){ a=0; b=nF-1; }
+    var st=Math.max(0,a*FR-Math.round(0.35*SR)), en=Math.min(d.length,(b+1)*FR+Math.round(1.0*SR));
     d=d.slice(st,en);
-    var fl=Math.min(Math.round(0.03*SR),d.length>>2); for(i=0;i<fl;i++){ d[i]*=i/fl; d[d.length-1-i]*=i/fl; }
   }
+  // Плавные края: вход 80 мс, выход 400 мс — фон комнаты не появляется и не исчезает рывком.
+  var fi=Math.min(Math.round(0.08*SR),d.length>>2), fo=Math.min(Math.round(0.4*SR),d.length>>2);
+  for(i=0;i<fi;i++) d[i]*=0.5-0.5*Math.cos(Math.PI*i/fi);
+  for(i=0;i<fo;i++) d[d.length-1-i]*=0.5-0.5*Math.cos(Math.PI*i/fo);
   // Уровень речи: средняя мощность громких 60% кадров с голосом — одинаково для тихой и громкой записи.
   var act=[]; for(f=0;f<nF;f++) if(r[f]>=thr) act.push(r[f]);
   act.sort(function(a,b){return b-a;});
@@ -1228,7 +1242,7 @@ function startRec(){
       var buf=new Float32Array(an.fftSize);
       (function loop(){ an.getFloatTimeDomainData(buf); var p=0; for(var k=0;k<buf.length;k++){ var v=Math.abs(buf[k]); if(v>p) p=v; }
         var db=20*Math.log10(p+1e-6), w=Math.max(0,Math.min(100,(db+60)/60*100)); $('#meterBar').style.width=w+'%';
-        if(p>0.97) $('#recHint').textContent='⚠ Слишком громко — отодвиньтесь от микрофона или уменьшите усиление';
+        if(p>0.97&&rec) $('#recHint').textContent='⚠ Слишком громко — отодвиньтесь от микрофона или уменьшите усиление';
         meterRaf=requestAnimationFrame(loop); })();
     }catch(e){ /* без индикатора громкости запись всё равно идёт */ }
     $('#recBtn').classList.add('on'); $('#recBtn').textContent='Идёт запись';
@@ -1273,7 +1287,11 @@ function stopRec(save){
     $('#prompterWrap').classList.add('hidden');
     if(save&&recChunks.length){ var blob=new Blob(recChunks,{type:r.mimeType||recMime||'audio/webm'}); addSegment(blob,'Фрагмент '+(segs.length+1)).then(function(){ toast('Фрагмент сохранён'); }); }
   };
-  try{ r.stop(); }catch(e){ r.onstop(); }
+  if(save){ // запись продолжается ещё 0,6 с — последнее слово и выдох не обрезаются
+    $('#recHint').textContent='Сохраняю…'; $('#recCtl').classList.add('hidden');
+    try{ if(r.state==='paused') r.resume(); }catch(e){}
+    setTimeout(function(){ try{ r.stop(); }catch(e){ r.onstop(); } },600);
+  } else { try{ r.stop(); }catch(e){ r.onstop(); } }
 }
 
 /* ---------- список фрагментов ---------- */

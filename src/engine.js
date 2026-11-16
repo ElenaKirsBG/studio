@@ -35,24 +35,32 @@ function buildTimeline(st, order) {
 /* огибающие голоса по кадрам 10 мс: для гейта и приглушения музыки */
 function voiceEnvelopes(tl, st) {
   var FR = 441, n = Math.ceil(tl.total / FR) + 2;
-  var rms = new Float32Array(n);
+  var rms = new Float32Array(n), gth = new Float32Array(n).fill(db2g(-52));
   for (var s = 0; s < tl.segs.length; s++) {
-    var sg = tl.segs[s], d = sg.data;
+    var sg = tl.segs[s], d = sg.data, loc = [];
     for (var j = 0; j < d.length; j += FR) {
       var sum = 0, e = Math.min(d.length, j + FR);
       for (var q = j; q < e; q++) sum += d[q] * d[q];
+      var fv = Math.sqrt(sum / (e - j)) * sg.gain; loc.push(fv);
       var fi = Math.floor((sg.start + j) / FR);
-      if (fi < n) rms[fi] = Math.max(rms[fi], Math.sqrt(sum / (e - j)) * sg.gain);
+      if (fi < n) rms[fi] = Math.max(rms[fi], fv);
     }
+    // Порог «тишины между фразами» — по фону именно этого фрагмента: у каждой записи свой шум комнаты,
+    // и после выравнивания громкости он разный. Так фон убирается одинаково во всех фрагментах.
+    var srt = loc.slice().sort(function (x, y) { return x - y; });
+    var noise = srt[Math.floor(srt.length * 0.1)] || 0, speech = srt[Math.floor(srt.length * 0.9)] || 0;
+    var t = Math.min(Math.max(noise * 3.2, db2g(-58)), Math.max(speech * 0.12, db2g(-58)));
+    var f0 = Math.floor(sg.start / FR), f1 = Math.min(n, Math.ceil((sg.start + d.length) / FR));
+    for (var ff = f0; ff < f1; ff++) gth[ff] = t;
   }
   var gate = new Float32Array(n), duck = new Float32Array(n);
-  var gThr = db2g(-52), act = new Float32Array(n);
+  var act = new Float32Array(n);
   var hold = 0, g = 0;
   for (var f = 0; f < n; f++) {
-    var on = rms[f] > gThr;
-    if (on) hold = 25; else if (hold > 0) hold--;
+    var on = rms[f] > gth[f];
+    if (on) hold = 30; else if (hold > 0) hold--;
     var target = (on || hold > 0) ? 1 : 0;
-    g += (target - g) * (target > g ? 0.8 : 0.06);
+    g += (target - g) * (target > g ? 0.7 : 0.03);
     gate[f] = g;
     act[f] = rms[f] > db2g(-42) ? 1 : 0;
   }
@@ -268,7 +276,7 @@ function* renderGen(msg) {
   var pv = st.padVol / 100, bv = st.bowlVol / 100, ov = st.oceanVol / 100, rv = st.rainVol / 100, nv = st.binVol / 100, cv = st.customVol / 100;
   var music = db2g(st.musicDb), voiceG = db2g(st.voiceDb), duckDepth = 1 - db2g(-st.duckDb);
   var wet = st.reverb / 100 * 1.1, dry = 1 - st.reverb / 100 * 0.25;
-  var gateFloor = st.gate ? db2g(-14) : 1;
+  var gateFloor = st.gate ? db2g(-22) : 1;
   var fi = st.fadeIn * SR, fo = st.fadeOut * SR;
   var thr = db2g(-20), ratio = 3, cenv = 0, ca = 1 - Math.exp(-1 / (0.005 * SR)), cr = 1 - Math.exp(-1 / (0.18 * SR)), makeup = db2g(7);
   var gsm = 0, dsm = 0;
