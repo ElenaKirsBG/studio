@@ -213,7 +213,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
           <div class="small muted" style="align-self:center">Работают только в наушниках, держите их тихими (10–25%).</div>
         </div>
       </div>
-      <div class="row" style="margin-top:14px"><button id="musicPrev">▶ Послушать музыку 30 с</button><button class="ghost hidden" id="musicStop">■ Стоп</button></div>
+      <div class="row" style="margin-top:14px"><button id="musicPrev">▶ Послушать музыку 30 с</button><button class="ghost hidden" id="musicStop">■ Стоп</button><span class="small muted" id="musicStatus"></span></div>
     </div>
     <div class="card">
       <h3>Своя музыкальная дорожка</h3>
@@ -1271,28 +1271,52 @@ function updateInfo(){
 }
 $('#timeline').onclick=function(e){ var r=this.getBoundingClientRect(); prevAt=Math.max(0,(e.clientX-r.left)/r.width*totals().total); updateInfo(); saveDraft(); };
 
-/* ---------- прослушивание ---------- */
-var pSrc=null, busy=false;
-function stopPlay(){ if(pSrc){ try{pSrc.stop();}catch(e){} pSrc=null; } $('#prevStop').classList.add('hidden'); $('#musicStop').classList.add('hidden'); $('#prevStatus').textContent=''; }
-function playLR(L,R,stopBtn){
-  var a=getAC(); stopPlay();
-  var b=a.createBuffer(2,L.length,SR); b.getChannelData(0).set(L); b.getChannelData(1).set(R);
-  pSrc=a.createBufferSource(); pSrc.buffer=b; pSrc.connect(a.destination); pSrc.start();
-  var me=pSrc; pSrc.onended=function(){ if(pSrc===me) stopPlay(); };
-  $(stopBtn).classList.remove('hidden');
+/* ---------- прослушивание ----------
+   Звук играет через обычный аудиоэлемент, а не Web Audio: на iPhone Web Audio молчит,
+   когда включён беззвучный режим, а аудиоэлемент звучит всегда (как музыка и видео). */
+var busy=false, pAudio=new Audio(), pUrl=null;
+pAudio.setAttribute('playsinline',''); pAudio.preload='auto';
+try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}
+function wavBlob(L,R){
+  var n=L.length, buf=new ArrayBuffer(44+n*4), v=new DataView(buf), i, o=44;
+  function str(p,t){ for(var k=0;k<t.length;k++) v.setUint8(p+k,t.charCodeAt(k)); }
+  str(0,'RIFF'); v.setUint32(4,36+n*4,true); str(8,'WAVE'); str(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,2,true);
+  v.setUint32(24,SR,true); v.setUint32(28,SR*4,true); v.setUint16(32,4,true); v.setUint16(34,16,true); str(36,'data'); v.setUint32(40,n*4,true);
+  for(i=0;i<n;i++){ var a=Math.max(-1,Math.min(1,L[i])), b=Math.max(-1,Math.min(1,R[i])); v.setInt16(o,a*32767,true); v.setInt16(o+2,b*32767,true); o+=4; }
+  return new Blob([buf],{type:'audio/wav'});
 }
-function preview(opts, stopBtn, statusEl){
+var SILENT=URL.createObjectURL(wavBlob(new Float32Array(2205),new Float32Array(2205)));
+function unlockAudio(){ // вызывается прямо в нажатии: после этого iPhone разрешит включить звук, когда он будет готов
+  try{ if(!pAudio.src||pAudio.src===SILENT){ pAudio.src=SILENT; var p=pAudio.play(); if(p&&p.catch) p.catch(function(){}); } }catch(e){}
+}
+function stopPlay(){
+  try{ if(pAudio.src!==SILENT) pAudio.pause(); }catch(e){}
+  $('#prevStop').classList.add('hidden'); $('#musicStop').classList.add('hidden'); $('#prevStatus').textContent=''; $('#musicStatus').textContent='';
+  $('#musicPrev').disabled=false; $('#prevBtn').disabled=false;
+}
+pAudio.addEventListener('ended',function(){ if(pAudio.src!==SILENT) stopPlay(); });
+function playLR(L,R,stopBtn,statusEl){
+  stopPlay();
+  if(pUrl) URL.revokeObjectURL(pUrl);
+  pUrl=URL.createObjectURL(wavBlob(L,R)); pAudio.src=pUrl;
+  var p=pAudio.play();
+  $(stopBtn).classList.remove('hidden');
+  if(statusEl) statusEl.textContent='Играет';
+  if(p&&p.catch) p.catch(function(){ if(statusEl) statusEl.textContent='Нажмите ещё раз, чтобы включить звук'; $(stopBtn).classList.add('hidden'); pAudio.src=SILENT; });
+}
+function preview(opts, stopBtn, statusEl, btn){
   if(busy){ toast('Подождите — идёт обработка'); return; }
-  getAC(); busy=true; stopPlay();
+  unlockAudio(); busy=true; stopPlay();
+  if(btn) btn.disabled=true;
   if(statusEl) statusEl.textContent='Готовлю звук…';
   var st=Object.assign({},S,opts.st||{});
   runJob({cmd:'render',mode:'preview',settings:st,order:opts.noVoice?[]:order(),from:opts.from||0,len:opts.len}, function(p){ if(statusEl) statusEl.textContent='Готовлю звук… '+Math.round(p*100)+'%'; })
-    .then(function(m){ busy=false; playLR(m.L,m.R,stopBtn); if(statusEl) statusEl.textContent='Играет'; })
-    .catch(function(e){ busy=false; if(statusEl) statusEl.textContent=''; toast('Ошибка: '+e.message); });
+    .then(function(m){ busy=false; if(btn) btn.disabled=false; playLR(m.L,m.R,stopBtn,statusEl); })
+    .catch(function(e){ busy=false; if(btn) btn.disabled=false; if(statusEl) statusEl.textContent=''; toast('Ошибка: '+e.message); });
 }
-$('#prevBtn').onclick=function(){ if(!segs.length) toast('Голоса пока нет — прозвучит только музыка'); preview({from:prevAt,len:60},'#prevStop',$('#prevStatus')); };
+$('#prevBtn').onclick=function(){ if(!segs.length) toast('Голоса пока нет — прозвучит только музыка'); preview({from:prevAt,len:60},'#prevStop',$('#prevStatus'),$('#prevBtn')); };
 $('#prevStop').onclick=stopPlay; $('#musicStop').onclick=stopPlay;
-$('#musicPrev').onclick=function(){ preview({noVoice:true,from:0,len:30,st:{minTotal:1,intro:0,fadeIn:3,fadeOut:3,outro:30}},'#musicStop',null); };
+$('#musicPrev').onclick=function(){ preview({noVoice:true,from:0,len:30,st:{minTotal:1,intro:0,fadeIn:3,fadeOut:3,outro:30}},'#musicStop',$('#musicStatus'),$('#musicPrev')); };
 
 /* ---------- экспорт ---------- */
 var wakeLock=null, exporting=false;
