@@ -559,6 +559,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
         <div><label class="f">Качество MP3</label><select id="kbps"><option value="0">Авто — самый лёгкий файл без потери качества (рекомендую)</option><option value="96">Компактно — моно 96 кбит/с (~0,7 МБ/мин)</option><option value="128">Стерео 128 кбит/с (~1 МБ/мин)</option><option value="160">Стерео 160 кбит/с (~1,2 МБ/мин)</option><option value="192">Стерео 192 кбит/с — максимум (~1,4 МБ/мин)</option></select><div class="small muted" id="kbpsHint" style="margin-top:4px"></div></div>
       </div>
       <div style="margin-top:12px"><label class="f">Описание (для продажи)</label><textarea id="mDesc" style="min-height:70px" placeholder="Кому подходит, что даёт, как слушать"></textarea></div>
+      <div class="note" id="autoBox" style="margin-top:10px"></div>
       <div class="row" style="margin-top:12px">
         <button class="primary big" id="exportBtn">✦ Создать MP3</button>
         <button class="ghost danger hidden" id="exportCancel">Остановить</button>
@@ -567,7 +568,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
         <summary>❓ Качество MP3 и описание</summary>
         <div class="hb">
           <p><b>Качество «Авто»</b> выбирает самый лёгкий файл без слышимой потери. Голос и мягкая музыка звучат в моно 96 кбит/с так же, как в стерео. Если включены бинауральные ритмы или своя стерео-дорожка, автоматически выбирается стерео 128 кбит/с: бинауральные ритмы в моно не работают. Монауральные и изохронные ритмы работают и в моно.</p>
-          <p><b>В описании для продажи</b> полезно указать: для чего медитация, длительность, как слушать (лёжа или сидя, в наушниках — если есть бинауральные ритмы), когда слушать (перед сном, утром). Для медитаций с ритмами мозга добавьте: «не слушать за рулём».</p>
+          <p><b>В описании для продажи</b> полезно указать: для чего медитация, длительность, как слушать (лёжа или сидя, в наушниках — если есть бинауральные ритмы), когда слушать (перед сном, утром). Предупреждения (наушники, вождение, эпилепсия, сон, регрессия, психосоматика, дети) студия добавляет в конец описания сама — смотрите блок под полем «Описание».</p>
         </div>
       </details>
       <div id="exportProg" class="hidden">
@@ -1751,7 +1752,7 @@ var PRESETS = [
   {id:'space',name:'✨ Космос',desc:'«Космос» на стеклянном тембре, поющие чаши, колокольчики и тета-ритм.',set:{mood:'space',padTone:'glass',padVol:65,bowlVol:28,chimeVol:10,binVol:14,binType:'theta'},mix:{outro:45,fadeOut:20,reverb:26,reverbSize:0.85}}
 ];
 function presetById(id){ for(var i=0;i<PRESETS.length;i++) if(PRESETS[i].id===id) return PRESETS[i]; return null; }
-var DEF = Object.assign({qv:2,nr:2,kbps:0,intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,tuning:432,seed:0,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,fs:26},
+var DEF = Object.assign({qv:2,nr:2,autoNotes:true,kbps:0,intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,tuning:432,seed:0,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,fs:26},
   MBASE, presetById('relax').set, {preset:'relax'});
 var S = Object.assign({}, DEF);
 var segs = [];          // {id,name,pause,blob,dur}
@@ -2048,9 +2049,9 @@ function bindSettings(){
   });
   SELS.forEach(function(k){ var el=$('#'+k); el.value=String(S[k]); el.onchange=function(){ S[k]=NUMSEL[k]?+el.value:el.value; refreshLabels(); changed(); if(k==='nr'&&segs.length){ reloadAll(); toast('Пересчитываю фрагменты с новым шумоподавлением…'); } }; });
   CHKS.forEach(function(k){ var el=$('#'+k); el.checked=!!S[k]; el.onchange=function(){ S[k]=el.checked; changed(); }; });
-  refreshLabels(); renderPresets(); renderNow();
+  refreshLabels(); renderPresets(); renderNow(); renderAuto();
 }
-function changed(){ renderPresets(); renderNow(); saveDraft(); }
+function changed(){ renderPresets(); renderNow(); renderAuto(); saveDraft(); }
 
 /* ---------- шаблоны и «Сейчас звучит» ---------- */
 function presetState(){
@@ -2252,6 +2253,44 @@ function mp3Mode(){
 function kbpsHint(){ var q=mp3Mode(), T=totals().total; $('#kbpsHint').textContent='Будет: '+q.label+' · примерно '+(T*q.kbps/8/1024).toFixed(1)+' МБ'; }
 var wakeLock=null, exporting=false;
 $('#mCat').innerHTML=CATS.map(function(c){return '<option>'+c+'</option>';}).join('');
+/* ---------- автоматические предупреждения для слушателя ----------
+   Студия сама распознаёт по настройкам музыки, разделу и названию, о чём нужно предупредить,
+   и добавляет эти строки в конец описания медитации при создании MP3. */
+var BEATHZ = {delta:2.5,theta4:4,theta:6,schumann:7.83,alpha8:8,alpha:10,smr:12,beta:15};
+function autoNotes(){
+  var notes=[], tips=[], cat=$('#mCat').value, title=($('#mTitle').value+' '+$('#mDesc').value).toLowerCase();
+  var b=+S.binVol>0, mode=S.binMode||'binaural', hz=BEATHZ[S.binType]||6;
+  var kidsTxt=cat==='Для детей'||/(^|[^а-я])(дет|детск|малыш)/.test(title);
+  var sleep=cat==='Сон'||/сон|засып|ночн|перед сном/.test(title)||+S.minTotal>0||+S.outro>=120||(b&&hz<4);
+  var regress=cat==='Погружение и регрессия'||/регресс|прошл(ая|ые|ых) жизн/.test(title);
+  var deep=sleep||regress||(b&&hz<8);
+  if(b&&mode==='binaural') notes.push('🎧 Слушайте в наушниках: в медитации есть бинауральные ритмы, они работают только в наушниках.');
+  if(deep) notes.push('🚗 Не слушайте за рулём, при работе с техникой и в других ситуациях, где нужно внимание: медитация погружает в глубокое расслабление и может вызывать сонливость.');
+  else notes.push('🚗 Не слушайте за рулём и во время дел, требующих внимания.');
+  if(b) notes.push(mode==='iso'
+    ? '⚠️ В медитации есть ритмичные звуковые пульсации. При эпилепсии или судорожных приступах в прошлом не слушайте её без согласования с врачом.'
+    : '⚠️ В медитации есть звуковые ритмы мозга. При эпилепсии или судорожных приступах в прошлом проконсультируйтесь с врачом перед прослушиванием.');
+  if(sleep) notes.push('🌙 Слушайте лёжа, перед сном, на тихой комфортной громкости. Дослушивать до конца не обязательно: засыпайте, когда захочется.');
+  if(regress) notes.push('💛 Если во время практики поднимаются сильные чувства или тяжёлые воспоминания, можно в любой момент открыть глаза и остановиться. Глубокую работу с травмой лучше проводить вместе со специалистом.');
+  if(cat==='Тело и психосоматика') notes.push('🩺 Медитация не заменяет медицинскую помощь. При новых, сильных или непонятных симптомах сначала обратитесь к врачу.');
+  if(cat==='Тревога и стресс') notes.push('💛 При сильной тревоге или панических атаках медитация — поддержка, но не замена помощи специалиста.');
+  if(kidsTxt){ notes.push('👧 Детям лучше слушать вместе со взрослым или под его присмотром.'); if(b) tips.push('Для детских медитаций рекомендую выключить ритмы мозга (ползунок «Бинауральные ритмы» → 0%).'); }
+  if(b&&mode==='iso'&&+S.binVol>15) tips.push('Изохронные ритмы громче 15% могут раздражать — рекомендую 5–12%.');
+  if(b&&+S.binVol>25) tips.push('Ритмы громче 25% утомляют слух — рекомендую 10–18%.');
+  if(+S.hbVol>0&&+S.hbBpm>64&&(cat==='Тревога и стресс'||sleep)) tips.push('Для тревоги и сна лучше пульс 54–60: частое сердцебиение может усиливать беспокойство.');
+  if(sleep&&(+S.birdVol>0||+S.chimeVol>0||(+S.bowlVol>0&&+S.bowlEvery<25))) tips.push('Для сна лучше убрать птиц, колокольчики и частые удары чаш — они бодрят.');
+  return {notes:notes,tips:tips};
+}
+function autoDescSuffix(){ if(!S.autoNotes) return ''; var a=autoNotes(); return a.notes.join('\n'); }
+function renderAuto(){
+  var box=$('#autoBox'); if(!box) return;
+  var a=autoNotes();
+  box.innerHTML='<label class="chk" style="margin:0 0 6px"><input type="checkbox" id="autoNotes"'+(S.autoNotes?' checked':'')+'> <span><b>Предупреждения для слушателя — добавлять в описание автоматически</b><br><span class="small muted">Студия сама определяет их по настройкам музыки, разделу и названию. Они появятся в конце описания в библиотеке и в приложении «Медитации».</span></span></label>'+
+    '<div style="'+(S.autoNotes?'':'opacity:.45')+'">'+a.notes.map(function(t){ return '<div class="small" style="margin:4px 0">'+esc(t)+'</div>'; }).join('')+'</div>'+
+    (a.tips.length?'<div class="note warn small" style="margin-top:8px"><b>Подсказки по настройкам:</b><br>'+a.tips.map(esc).join('<br>')+'</div>':'');
+  $('#autoNotes').onchange=function(){ S.autoNotes=this.checked; renderAuto(); saveDraft(); };
+}
+['#mCat','#mTitle','#mDesc'].forEach(function(id){ var el=$(id); el.addEventListener(id==='#mCat'?'change':'input',function(){ renderAuto(); }); });
 $('#exportBtn').onclick=function(){
   streamStop();
   if(busy){ toast('Подождите — идёт обработка'); return; }
@@ -2268,7 +2307,7 @@ $('#exportBtn').onclick=function(){
     var el=(Date.now()-t0)/1000, eta=p>0.02?el/p-el:0;
     $('#exportTxt').textContent='Создаю медитацию… '+Math.round(p*100)+'%'+(eta?' · осталось ≈ '+fmt(eta):'');
   }).then(function(m){
-    var item={id:uid(),title:title,category:$('#mCat').value,client:$('#mClient').value.trim(),desc:$('#mDesc').value.trim(),duration:m.info.total,created:Date.now(),size:m.blob.size,kbps:S.kbps,blob:m.blob,
+    var item={id:uid(),title:title,category:$('#mCat').value,client:$('#mClient').value.trim(),desc:(function(){ var d=$('#mDesc').value.trim(), x=autoDescSuffix(); return x?(d?d+'\n\n':'')+x:d; })(),autoNotes:!!S.autoNotes,duration:m.info.total,created:Date.now(),size:m.blob.size,kbps:S.kbps,blob:m.blob,
       music:{mood:S.mood,tuning:S.tuning,preset:S.preset||null}};
     return libPut(item).then(function(){ return item; });
   }).then(function(item){
@@ -2522,7 +2561,7 @@ kvGet('draft').then(function(d){
     if(customBlob){ $('#customName').textContent=customName; $('#customDel').classList.remove('hidden'); }
   }
   $('#script').value=script; $('#prompter').style.fontSize=S.fs+'px';
-  bindSettings(); renderSegs(); updateInfo(); micList();
+  bindSettings(); renderSegs(); updateInfo(); micList(); renderAuto();
   if(segs.length||customBlob) reloadAll();
   renderLib();
 });
