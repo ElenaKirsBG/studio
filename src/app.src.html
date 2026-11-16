@@ -239,7 +239,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       <div class="timeline" id="timeline" title="Нажмите, чтобы выбрать место прослушивания"></div>
       <div class="legend"><span><b style="background:#e3d3c2"></b>только музыка</span><span><b style="background:var(--mauve)"></b>голос</span><span><b style="background:#d9c6e0"></b>паузы</span><span>▍ — место прослушивания</span></div>
       <div class="row" style="margin-top:12px">
-        <button class="primary" id="prevBtn">▶ Прослушать 60 с с отметки <span id="prevAt">0:00</span></button>
+        <button class="primary" id="prevBtn">▶ Слушать с отметки <span id="prevAt">0:00</span></button>
         <button class="ghost hidden" id="prevStop">■ Стоп</button>
         <span class="small muted" id="prevStatus"></span>
       </div>
@@ -271,7 +271,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
         <div><label class="f">Название</label><input type="text" id="mTitle" placeholder="Например: Глубокий сон"></div>
         <div><label class="f">Раздел</label><select id="mCat"></select></div>
         <div><label class="f">Для клиента (необязательно)</label><input type="text" id="mClient" placeholder="Имя — для индивидуальных медитаций"></div>
-        <div><label class="f">Качество MP3</label><select id="kbps"><option value="128">128 кбит/с — компактно</option><option value="160">160 кбит/с — оптимально</option><option value="192">192 кбит/с — высокое</option></select></div>
+        <div><label class="f">Качество MP3</label><select id="kbps"><option value="0">Авто — самый лёгкий файл без потери качества (рекомендую)</option><option value="96">Компактно — моно 96 кбит/с (~0,7 МБ/мин)</option><option value="128">Стерео 128 кбит/с (~1 МБ/мин)</option><option value="160">Стерео 160 кбит/с (~1,2 МБ/мин)</option><option value="192">Стерео 192 кбит/с — максимум (~1,4 МБ/мин)</option></select><div class="small muted" id="kbpsHint" style="margin-top:4px"></div></div>
       </div>
       <div style="margin-top:12px"><label class="f">Описание (для продажи)</label><textarea id="mDesc" style="min-height:70px" placeholder="Кому подходит, что даёт, как слушать"></textarea></div>
       <div class="row" style="margin-top:12px">
@@ -281,7 +281,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       <div id="exportProg" class="hidden">
         <div class="prog"><i id="exportBar"></i></div>
         <div class="small muted" id="exportTxt"></div>
-        <div class="note small" style="margin-top:8px">Не закрывайте вкладку и не блокируйте экран, пока идёт создание. Примерная скорость: 10–20 минут медитации собираются за 1–4 минуты (на телефоне дольше).</div>
+        <div class="note small" style="margin-top:8px">Не закрывайте вкладку и не блокируйте экран, пока идёт создание. Примерная скорость: 10–20 минут медитации собираются за 1–4 минуты (на телефоне дольше). Прослушать целиком перед созданием можно кнопкой «▶ Слушать с отметки» выше.</div>
       </div>
       <div id="exportDone" class="hidden" style="margin-top:14px"></div>
     </div>
@@ -325,7 +325,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
 var SR = 44100;
 var $ = function(s){ return document.querySelector(s); };
 var CATS = ['Сон','Тревога и стресс','Расслабление','Самооценка и любовь к себе','Отношения','Деньги и изобилие','Тело и психосоматика','Утро и энергия','Погружение и регрессия','Прощение и отпускание','Для детей','Индивидуальные','Другое'];
-var DEF = {intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,mood:'calm',tuning:432,padVol:70,bowlVol:40,bowlEvery:16,oceanVol:0,rainVol:0,binVol:0,binType:'theta',binCarrier:200,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,kbps:160,fs:26};
+var DEF = {qv:2,kbps:0,intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,mood:'calm',tuning:432,padVol:70,bowlVol:40,bowlEvery:16,oceanVol:0,rainVol:0,binVol:0,binType:'theta',binCarrier:200,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,fs:26};
 var PRESETS = [
   ['🌙 Сон',{mood:'deep',padVol:70,bowlVol:0,oceanVol:35,rainVol:0,binVol:18,binType:'delta',outro:120,fadeOut:60,reverb:22}],
   ['🍃 Расслабление',{mood:'calm',padVol:70,bowlVol:40,oceanVol:0,rainVol:0,binVol:0,outro:40,fadeOut:15,reverb:18}],
@@ -381,7 +381,7 @@ var libPut=function(v){ return tx('library','readwrite',function(s){ s.put(v); }
 var libDel=function(id){ return tx('library','readwrite',function(s){ s.delete(id); }); };
 
 var saveT;
-function saveDraft(){ clearTimeout(saveT); saveT=setTimeout(function(){
+function saveDraft(){ try{ kbpsHint(); }catch(e){} clearTimeout(saveT); saveT=setTimeout(function(){
   kvSet('draft',{settings:S,script:script,segs:segs.map(function(g){return {id:g.id,name:g.name,pause:g.pause,blob:g.blob,dur:g.dur};}),customBlob:customBlob,customName:customName,prevAt:prevAt});
 },500); }
 
@@ -391,7 +391,9 @@ function makeWorker(){
   var src = $('#lameSrc').textContent + '\n;\n' + $('#engineSrc').textContent;
   worker = new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
   worker.onmessage = function(e){
-    var m=e.data, j=jobs[m.job];
+    var m=e.data;
+    if(m.cmd==='streamData'){ onStream(m); return; }
+    var j=jobs[m.job];
     if(m.cmd==='progress'){ if(j&&j.progress) j.progress(m.p); return; }
     if(!j) return;
     delete jobs[m.job];
@@ -485,7 +487,7 @@ function startRec(){
   if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ micError({name:'NoSupport'}); return; }
   if(!window.MediaRecorder){ micError({name:'NoRecorder'}); return; }
   if(document.featurePolicy&&document.featurePolicy.allowsFeature&&!document.featurePolicy.allowsFeature('microphone')){ micError({name:'PolicyBlocked'}); return; }
-  stopPlay(); setSession('auto');
+  stopPlay(); streamStop(); setSession('auto');
   var dev=$('#micSel').value;
   var actx=null; try{ actx=getAC(); }catch(e){}
   $('#recHint').textContent='Подключаю микрофон…';
@@ -618,7 +620,7 @@ function updateInfo(){
   $('#timeline').innerHTML=html+'<span class="tl-cursor" style="left:'+(prevAt/T.total*100)+'%"></span>';
   var pa=$('#prevAt'); if(pa) pa.textContent=fmt(prevAt);
 }
-$('#timeline').onclick=function(e){ var r=this.getBoundingClientRect(); prevAt=Math.max(0,(e.clientX-r.left)/r.width*totals().total); updateInfo(); saveDraft(); };
+$('#timeline').onclick=function(e){ var r=this.getBoundingClientRect(); prevAt=Math.max(0,(e.clientX-r.left)/r.width*totals().total); if(ST){ streamPlay(prevAt); return; } updateInfo(); saveDraft(); };
 
 /* ---------- прослушивание ----------
    Звук играет через обычный аудиоэлемент, а не Web Audio: на iPhone Web Audio молчит,
@@ -650,7 +652,7 @@ function stopPlay(){
   $('#prevStop').classList.add('hidden'); $('#musicStop').classList.add('hidden'); $('#prevStatus').textContent=''; $('#musicStatus').textContent='';
   $('#musicPrev').disabled=false; $('#prevBtn').disabled=false;
   $('#musicPrev').textContent=BTN_TXT.musicPrev; $('#musicPrev').classList.remove('danger');
-  $('#prevBtn').innerHTML='▶ Прослушать 60 с с отметки <span id="prevAt">'+fmt(prevAt)+'</span>'; $('#prevBtn').classList.remove('danger');
+  if(!ST){ $('#prevBtn').innerHTML='▶ Слушать с отметки <span id="prevAt">'+fmt(prevAt)+'</span>'; $('#prevBtn').classList.remove('danger'); }
   playBtn=null; setSession('auto');
 }
 pAudio.addEventListener('ended',function(){ if(pAudio.src!==SILENT) stopPlay(); });
@@ -667,6 +669,7 @@ function playLR(L,R,stopBtn,statusEl){
   if(p&&p.catch) p.catch(function(){ if(statusEl) statusEl.textContent='Нажмите ещё раз, чтобы включить звук'; $(stopBtn).classList.add('hidden'); pAudio.src=SILENT; });
 }
 function preview(opts, stopBtn, statusEl, btn){
+  streamStop();
   if(busy){ toast('Подождите — идёт обработка'); return; }
   unlockAudio(); busy=true; stopPlay();
   if(btn) btn.disabled=true;
@@ -676,14 +679,74 @@ function preview(opts, stopBtn, statusEl, btn){
     .then(function(m){ busy=false; if(btn) btn.disabled=false; playLR(m.L,m.R,stopBtn,statusEl); })
     .catch(function(e){ busy=false; if(btn) btn.disabled=false; if(statusEl) statusEl.textContent=''; toast('Ошибка: '+e.message); });
 }
-$('#prevBtn').onclick=function(){ if(playBtn===this){ stopPlay(); return; } if(!segs.length) toast('Голоса пока нет — прозвучит только музыка'); preview({from:prevAt,len:60},'#prevStop',$('#prevStatus'),$('#prevBtn')); };
-$('#prevStop').onclick=stopPlay; $('#musicStop').onclick=stopPlay;
+/* ---------- прослушивание целиком: звук собирается кусками прямо во время воспроизведения ---------- */
+var ST=null, sidN=0;
+function streamStop(){
+  if(!ST) return; var s=ST; ST=null;
+  try{ worker.postMessage({cmd:'streamStop'}); }catch(e){}
+  clearInterval(s.timer);
+  try{ s.gain.gain.setTargetAtTime(0,s.ac.currentTime,0.06); }catch(e){}
+  setTimeout(function(){ s.srcs.forEach(function(x){ try{x.stop();}catch(e){} }); try{ s.gain.disconnect(); }catch(e){} },350);
+  $('#prevStop').classList.add('hidden'); $('#prevStatus').textContent='';
+  $('#prevBtn').innerHTML='▶ Слушать с отметки <span id="prevAt">'+fmt(prevAt)+'</span>'; $('#prevBtn').classList.remove('danger');
+  setSession('auto'); updateInfo();
+}
+function streamPlay(from){
+  if(busy){ toast('Подождите — идёт обработка'); return; }
+  if(segs.some(function(g){return g.loading;})){ toast('Фрагменты ещё обрабатываются'); return; }
+  stopPlay(); streamStop();
+  var T=totals(); from=Math.max(0,Math.min(from,T.total-3));
+  setSession('playback');
+  var ac=getAC(); try{ ac.resume(); }catch(e){}
+  var g=ac.createGain(); g.connect(ac.destination);
+  ST={sid:++sidN,ac:ac,gain:g,srcs:[],from:from,t0:0,next:0,total:T.total,req:false,done:false,timer:null};
+  $('#prevBtn').textContent='■ Остановить'; $('#prevBtn').classList.add('danger'); $('#prevStop').classList.remove('hidden');
+  $('#prevStatus').textContent='Готовлю звук…';
+  worker.postMessage({cmd:'streamStart',sid:ST.sid,settings:Object.assign({},S),order:order(),from:from,first:6});
+}
+function onStream(m){
+  if(!ST||m.sid!==ST.sid) return;
+  var ac=ST.ac; ST.req=false; ST.done=m.done; if(m.total) ST.total=m.total;
+  if(m.L.length){
+    var b=ac.createBuffer(2,m.L.length,SR); b.getChannelData(0).set(m.L); b.getChannelData(1).set(m.R);
+    var src=ac.createBufferSource(); src.buffer=b; src.connect(ST.gain);
+    var now=ac.currentTime;
+    if(!ST.t0){ ST.t0=now+0.12; ST.next=ST.t0; ST.timer=setInterval(streamTick,400); }
+    else if(ST.next<now+0.03){ var lag=now+0.08-ST.next; ST.t0+=lag; ST.next+=lag; }  // не успели подготовить — сдвигаем без щелчка
+    src.start(ST.next); ST.next+=b.duration; ST.srcs.push(src);
+    src.onended=function(){ if(ST){ var i=ST.srcs.indexOf(src); if(i>=0) ST.srcs.splice(i,1); } };
+  }
+  streamTick();
+}
+function streamTick(){
+  if(!ST||!ST.t0) return;
+  var now=ST.ac.currentTime, pos=ST.from+Math.max(0,now-ST.t0), ahead=ST.next-now;
+  if(ST.done&&now>=ST.next-0.05){ prevAt=0; streamStop(); toast('Медитация прослушана до конца'); return; }
+  if(!ST.done&&!ST.req&&ahead<20){ ST.req=true; worker.postMessage({cmd:'streamMore',sid:ST.sid,sec:15}); }
+  $('#prevStatus').textContent='Играет '+fmt(pos)+' / '+fmt(ST.total)+(ahead<1&&!ST.done?' · подгружаю…':'');
+  var c=document.querySelector('.tl-cursor'); if(c) c.style.left=Math.min(100,pos/ST.total*100)+'%';
+  prevAt=pos;
+}
+$('#prevBtn').onclick=function(){ if(ST){ streamStop(); return; } if(!segs.length) toast('Голоса пока нет — прозвучит только музыка'); streamPlay(prevAt); };
+$('#prevStop').onclick=function(){ streamStop(); };
+$('#musicStop').onclick=stopPlay;
 $('#musicPrev').onclick=function(){ if(playBtn===this){ stopPlay(); return; } preview({noVoice:true,from:0,len:30,st:{minTotal:1,intro:0,fadeIn:3,fadeOut:3,outro:30}},'#musicStop',$('#musicStatus'),$('#musicPrev')); };
 
 /* ---------- экспорт ---------- */
+// Голос записан в моно, а мягкая музыка почти не теряет от моно — поэтому для медитаций без бинауральных
+// ритмов и без своей стерео-дорожки моно 96 кбит/с звучит так же, как стерео 160, а весит в 1,7 раза меньше.
+// Бинауральные ритмы работают только в стерео — тогда выбирается стерео 128 кбит/с.
+function mp3Mode(){
+  var k=+S.kbps||0, needStereo=S.binVol>0||(customBlob&&S.customVol>0);
+  if(k===0) return needStereo?{kbps:128,mono:false,label:'стерео 128 кбит/с — нужны бинауральные ритмы или своя стерео-дорожка'}:{kbps:96,mono:true,label:'моно 96 кбит/с'};
+  if(k===96&&S.binVol>0) return {kbps:128,mono:false,label:'стерео 128 кбит/с: бинауральные ритмы не работают в моно'};
+  return {kbps:k,mono:k===96,label:(k===96?'моно ':'стерео ')+k+' кбит/с'};
+}
+function kbpsHint(){ var q=mp3Mode(), T=totals().total; $('#kbpsHint').textContent='Будет: '+q.label+' · примерно '+(T*q.kbps/8/1024).toFixed(1)+' МБ'; }
 var wakeLock=null, exporting=false;
 $('#mCat').innerHTML=CATS.map(function(c){return '<option>'+c+'</option>';}).join('');
 $('#exportBtn').onclick=function(){
+  streamStop();
   if(busy){ toast('Подождите — идёт обработка'); return; }
   if(!segs.length){ toast('Сначала запишите или загрузите голос'); document.querySelector('[data-tab=voice]').click(); return; }
   if(segs.some(function(g){return g.loading;})){ toast('Фрагменты ещё обрабатываются'); return; }
@@ -692,7 +755,8 @@ $('#exportBtn').onclick=function(){
   $('#exportBtn').disabled=true; $('#exportCancel').classList.remove('hidden'); $('#exportProg').classList.remove('hidden'); $('#exportDone').classList.add('hidden');
   $('#exportBar').style.width='0'; var t0=Date.now();
   try{ if(navigator.wakeLock) navigator.wakeLock.request('screen').then(function(w){wakeLock=w;}).catch(function(){}); }catch(e){}
-  runJob({cmd:'render',mode:'export',settings:Object.assign({},S),order:order(),from:0,kbps:S.kbps}, function(p){
+  var q=mp3Mode();
+  runJob({cmd:'render',mode:'export',settings:Object.assign({},S),order:order(),from:0,kbps:q.kbps,mono:q.mono}, function(p){
     $('#exportBar').style.width=(p*100)+'%';
     var el=(Date.now()-t0)/1000, eta=p>0.02?el/p-el:0;
     $('#exportTxt').textContent='Создаю медитацию… '+Math.round(p*100)+'%'+(eta?' · осталось ≈ '+fmt(eta):'');
@@ -922,7 +986,7 @@ try{ if('serviceWorker' in navigator && location.protocol==='https:' && window.s
 makeWorker();
 kvGet('draft').then(function(d){
   if(d){
-    Object.assign(S,d.settings||{}); script=d.script||''; prevAt=d.prevAt||0;
+    Object.assign(S,d.settings||{}); if(S.qv!==2){ S.kbps=0; S.qv=2; }  // новый режим «Авто» по умолчанию script=d.script||''; prevAt=d.prevAt||0;
     segs=(d.segs||[]).filter(function(g){return g.blob;}).map(function(g){ return {id:g.id,name:g.name,pause:g.pause,blob:g.blob,dur:g.dur||0}; });
     customBlob=d.customBlob||null; customName=d.customName||'';
     if(customBlob){ $('#customName').textContent=customName; $('#customDel').classList.remove('hidden'); }

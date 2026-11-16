@@ -247,7 +247,7 @@ Reverb.prototype.p = function (x, out) {
 };
 
 /* ---------- основной рендер ---------- */
-function render(msg, onChunk, onProgress) {
+function* renderGen(msg) {
   var st = msg.settings, tl = buildTimeline(st, msg.order);
   var total = tl.total;
   var from = Math.round((msg.from || 0) * SR);
@@ -327,11 +327,31 @@ function render(msg, onChunk, onProgress) {
     }
     if (cs + n > from) {
       var skip = Math.max(0, from - cs);
-      onChunk(skip ? outL.subarray(skip) : outL, skip ? outR.subarray(skip) : outR);
+      yield { L: skip ? outL.subarray(skip) : outL, R: skip ? outR.subarray(skip) : outR, p: (ce - from) / Math.max(1, to - from), total: total / SR };
     }
-    onProgress((ce - from) / Math.max(1, to - from));
   }
   return { total: total / SR, voiceEnd: tl.voiceEnd / SR };
+}
+function render(msg, onChunk, onProgress) {
+  var g = renderGen(msg), r;
+  while (!(r = g.next()).done) { onChunk(r.value.L, r.value.R); onProgress(r.value.p); }
+  return r.value;
+}
+/* потоковое прослушивание: звук собирается кусками прямо во время воспроизведения */
+var STREAM = null;
+function streamPart(sec) {
+  if (!STREAM) return;
+  var need = Math.round(sec * SR), Ls = [], Rs = [], got = 0, done = false, r;
+  while (got < need) {
+    r = STREAM.gen.next();
+    if (r.done) { done = true; break; }
+    Ls.push(r.value.L.slice()); Rs.push(r.value.R.slice()); got += r.value.L.length; STREAM.total = r.value.total;
+  }
+  var L = new Float32Array(got), R2 = new Float32Array(got), o = 0;
+  for (var i = 0; i < Ls.length; i++) { L.set(Ls[i], o); R2.set(Rs[i], o); o += Ls[i].length; }
+  var start = STREAM.pos; STREAM.pos += got / SR;
+  self.postMessage({ cmd: 'streamData', sid: STREAM.sid, L: L, R: R2, start: start, done: done, total: STREAM.total }, [L.buffer, R2.buffer]);
+  if (done) STREAM = null;
 }
 function soft(x) {
   var a = x < 0 ? -x : x;
@@ -350,6 +370,9 @@ if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typ
       if (m.cmd === 'dropVoice') { delete VOICE[m.id]; return; }
       if (m.cmd === 'custom') { CUSTOM = m.data; return; }
       if (m.cmd === 'info') { var tl = buildTimeline(m.settings, m.order); self.postMessage({ cmd: 'info', total: tl.total / SR, voiceEnd: tl.voiceEnd / SR, reqId: m.reqId }); return; }
+      if (m.cmd === 'streamStart') { STREAM = { gen: renderGen(m), sid: m.sid, pos: m.from || 0, total: 0 }; streamPart(m.first || 6); return; }
+      if (m.cmd === 'streamMore') { if (STREAM && STREAM.sid === m.sid) streamPart(m.sec || 15); return; }
+      if (m.cmd === 'streamStop') { STREAM = null; return; }
       if (m.cmd === 'render') {
         var lastP = 0;
         var prog = function (p) { var now = Date.now(); if (now - lastP > 250) { lastP = now; self.postMessage({ cmd: 'progress', p: p, job: m.job }); } };
@@ -360,11 +383,13 @@ if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typ
           for (var i = 0; i < Ls.length; i++) { L.set(Ls[i], o); R.set(Rs[i], o); o += Ls[i].length; }
           self.postMessage({ cmd: 'preview', L: L, R: R, job: m.job, info: info }, [L.buffer, R.buffer]);
         } else {
-          var enc = new lamejs.Mp3Encoder(2, SR, m.kbps || 160), parts = [];
+          var mono = !!m.mono, enc = new lamejs.Mp3Encoder(mono ? 1 : 2, SR, m.kbps || 160), parts = [];
           var info2 = render(m, function (l, r) {
-            var li = toI16(l), ri = toI16(r);
-            for (var k = 0; k < li.length; k += 11520) {
-              var b = enc.encodeBuffer(li.subarray(k, k + 11520), ri.subarray(k, k + 11520));
+            var li, ri, k, b;
+            if (mono) { var mx = new Float32Array(l.length); for (k = 0; k < l.length; k++) mx[k] = (l[k] + r[k]) * 0.5; li = toI16(mx); }
+            else { li = toI16(l); ri = toI16(r); }
+            for (k = 0; k < li.length; k += 11520) {
+              b = mono ? enc.encodeBuffer(li.subarray(k, k + 11520)) : enc.encodeBuffer(li.subarray(k, k + 11520), ri.subarray(k, k + 11520));
               if (b.length) parts.push(b);
             }
           }, prog);
