@@ -10,15 +10,26 @@ function mkRng(seed) { var s = (seed >>> 0) || 1; return function () { s ^= s <<
 var VOICE = {};           // id -> Float32Array (моно, 44100, нормализовано)
 var CUSTOM = null;        // {L, R}
 
-/* ---------- лады / настроения ---------- */
+/* ---------- лады / настроения ----------
+   Числа — полутоны от ноты A (ля) нижней октавы. root — тоника для бурдона.
+   Все аккорды каждого настроения взяты из одного лада, поэтому мелодия, чаши и колокольчики,
+   которые берут ноты из текущего аккорда, никогда не фальшивят. */
 var MOODS = {
-  calm:  { dur: 24, chords: [[0,7,12,15,19],[-4,3,7,12,15],[3,10,14,19],[-5,2,5,10,14]], bowls: [12,15,17,19,22,24] },
-  light: { dur: 24, chords: [[3,10,14,17,19],[-4,3,7,10,12],[0,7,10,12,15],[-2,5,12,14]], bowls: [15,17,19,22,24,27] },
-  deep:  { dur: 30, chords: [[-7,0,5,12],[-7,-2,5,10],[-9,-2,3,10]], bowls: [5,10,12,15,17] },
-  space: { dur: 28, chords: [[0,7,14,16,18],[-3,4,11,14,16],[2,9,16,18,23]], bowls: [12,14,16,18,19,23] },
-  heart: { dur: 26, chords: [[-7,0,5,9,12],[-2,5,9,14],[0,4,7,12,16],[-4,3,8,12]], bowls: [12,16,19,21,24] }
+  calm:    { dur: 24, root: 0, chords: [[0,7,12,15,19],[-4,3,7,12,15],[3,10,14,19],[-5,2,5,10,14]], bowls: [12,15,17,19,22,24] },
+  light:   { dur: 24, root: 3, chords: [[3,10,14,17,19],[-4,3,7,10,12],[0,7,10,12,15],[-2,5,12,14]], bowls: [15,17,19,22,24,27] },
+  deep:    { dur: 30, root: 5, chords: [[-7,0,5,12],[-7,-2,5,10],[-9,-2,3,10]], bowls: [5,10,12,15,17] },
+  space:   { dur: 28, root: 0, chords: [[0,7,14,16,18],[-3,4,11,14,16],[2,9,16,18,23]], bowls: [12,14,16,18,19,23] },
+  heart:   { dur: 26, root: 5, chords: [[-7,0,5,9,12],[-2,5,9,14],[0,4,7,12,16],[-4,3,8,12]], bowls: [12,16,19,21,24] },
+  forest:  { dur: 26, root: 0, chords: [[0,7,12,16,18],[2,9,14,18,21],[-5,2,7,11,14],[-3,4,9,12,16]], bowls: [12,14,16,18,19,21] },
+  sea:     { dur: 30, root: 0, chords: [[0,7,12,14,19],[-5,2,7,9,14],[-3,4,9,11,16],[-7,0,5,7,12]], bowls: [12,14,16,19,21,24] },
+  dream:   { dur: 28, root: 0, chords: [[0,4,11,14,16],[-7,-3,4,7,9],[-8,-5,-1,2,7],[-10,-7,-3,0,4]], bowls: [11,14,16,19,23] },
+  night:   { dur: 36, root: 0, chords: [[-12,-5,0,3,7],[-16,-9,-4,0,3],[-14,-7,-2,2,5]], bowls: [7,10,12,15] },
+  ancient: { dur: 32, root: 0, chords: [[-12,-5,0,3,7],[-12,-5,2,5,9],[-12,-5,-2,5,10],[-12,-5,0,5,9]], bowls: [0,5,7,12,15,17] },
+  sunrise: { dur: 22, root: 0, chords: [[0,4,7,12,16],[-5,-1,2,7,11],[-3,0,4,9,12],[-7,-3,0,5,9]], bowls: [12,16,19,21,24] },
+  crystal: { dur: 26, root: 0, chords: [[12,19,24,26,31],[7,14,19,23,26],[9,16,21,24,28],[5,12,17,21,24]], bowls: [24,26,28,31,33,36] }
 };
-
+function moodOf(st) { return MOODS[st.mood] || MOODS.calm; }
+function chordDur(st) { return moodOf(st).dur * ((st.chordSlow || 100) / 100); }
 /* ---------- построение таймлайна голоса ---------- */
 function buildTimeline(st, order) {
   var t = Math.round(st.intro * SR), segs = [];
@@ -78,38 +89,45 @@ function voiceEnvelopes(tl, st) {
 }
 
 /* ---------- генераторы ---------- */
+/* Тембры пэда: det — расстройка (ширина), c — октава, d — верхний обертон, lp — яркость, br — «дыхание» */
+var PADTONES = {
+  warm:  { det: 0.0015, c: 0.12, d: 0,    lp: 0.12, g: 1,    br: 0.28 },
+  soft:  { det: 0.001,  c: 0,    d: 0,    lp: 0.05, g: 1.05, br: 0.2 },
+  choir: { det: 0.0045, c: 0.22, d: 0.1,  lp: 0.22, g: 0.95, br: 0.36 },
+  organ: { det: 0.0007, c: 0.42, d: 0.24, lp: 0.3,  g: 0.7,  br: 0.06 },
+  glass: { det: 0.002,  c: 0.3,  d: 0.17, lp: 0.42, g: 0.9, br: 0.45, dr: 4.007 }
+};
 function Pad(st, t0) {
-  var mood = MOODS[st.mood] || MOODS.calm, base = st.tuning / 4; // A2
+  var mood = moodOf(st), base = st.tuning / 4, T = PADTONES[st.padTone] || PADTONES.warm, det = T.det, dr = T.dr || 3.003;
   var chords = mood.chords.map(function (ch) {
     return ch.map(function (n, k) {
       var f = base * Math.pow(2, n / 12);
       return {
-        f1: f * 0.9985, f2: f * 1.0015, f3: f * 2.001,
-        p1: frac(f * 0.9985 * t0), p2: frac(f * 1.0015 * t0), p3: frac(f * 2.001 * t0),
-        lf: 0.021 + 0.013 * k, lp: k * 1.7, amp: 1 / Math.sqrt(ch.length) * (f < 90 ? 0.8 : 1)
+        f1: f * (1 - det), f2: f * (1 + det), f3: f * 2.001, f4: f * dr,
+        p1: frac(f * (1 - det) * t0), p2: frac(f * (1 + det) * t0), p3: frac(f * 2.001 * t0), p4: frac(f * dr * t0),
+        lf: 0.021 + 0.013 * k, lp: k * 1.7, amp: 1 / Math.sqrt(ch.length) * (f < 90 ? 0.8 : 1) * (f > 500 ? 0.75 : 1)
       };
     });
   });
-  this.chords = chords; this.dur = mood.dur; this.xf = 9;
+  this.T = T; this.chords = chords; this.dur = chordDur(st); this.xf = Math.min(9 * this.dur / mood.dur, this.dur * 0.45);
   this.lpL = 0; this.lpR = 0;
   this.w = new Float32Array(chords.length);
 }
 Pad.prototype.control = function (t) {
-  var n = this.chords.length, pos = t / this.dur, i = Math.floor(pos) % n, loc = t - Math.floor(pos) * this.dur;
+  var n = this.chords.length, pos = t / this.dur, i = Math.floor(pos) % n, loc = t - Math.floor(pos) * this.dur, br = this.T.br;
   for (var k = 0; k < n; k++) this.w[k] = 0;
   var x = loc < this.xf ? loc / this.xf : 1;
   var prev = (i - 1 + n) % n;
   if (t < this.xf) x = 1;
   this.w[i] = Math.sin(x * Math.PI / 2);
   if (x < 1) this.w[prev] = Math.cos(x * Math.PI / 2);
-  // «дыхание» нот
   for (k = 0; k < n; k++) {
     var ch = this.chords[k];
-    for (var j = 0; j < ch.length; j++) ch[j].g = this.w[k] * ch[j].amp * (0.72 + 0.28 * Math.sin(2 * Math.PI * ch[j].lf * t + ch[j].lp));
+    for (var j = 0; j < ch.length; j++) ch[j].g = this.w[k] * ch[j].amp * ((1 - br) + br * Math.sin(2 * Math.PI * ch[j].lf * t + ch[j].lp));
   }
 };
 Pad.prototype.tick = function (out) {
-  var L = 0, R = 0, chords = this.chords;
+  var L = 0, R = 0, chords = this.chords, cw = this.T.c, dw = this.T.d;
   for (var k = 0; k < chords.length; k++) {
     if (this.w[k] <= 0) continue;
     var ch = chords[k];
@@ -119,16 +137,42 @@ Pad.prototype.tick = function (out) {
       o.p1 += o.f1 / SR; if (o.p1 >= 1) o.p1 -= 1;
       o.p2 += o.f2 / SR; if (o.p2 >= 1) o.p2 -= 1;
       o.p3 += o.f3 / SR; if (o.p3 >= 1) o.p3 -= 1;
-      L += g * (a * 0.75 + b * 0.25 + c * 0.12);
-      R += g * (a * 0.25 + b * 0.75 + c * 0.12);
+      var cl = a * 0.75 + b * 0.25 + c * cw, cr = a * 0.25 + b * 0.75 + c * cw;
+      if (dw) { var d = TAB[(o.p4 * TN) | 0]; o.p4 += o.f4 / SR; if (o.p4 >= 1) o.p4 -= 1; cl += d * dw; cr += d * dw * 0.9; }
+      L += g * cl; R += g * cr;
     }
   }
-  this.lpL += (L - this.lpL) * 0.12; this.lpR += (R - this.lpR) * 0.12;
-  out[0] = this.lpL * 0.2; out[1] = this.lpR * 0.2;
+  var lp = this.T.lp;
+  this.lpL += (L - this.lpL) * lp; this.lpR += (R - this.lpR) * lp;
+  out[0] = this.lpL * 0.2 * this.T.g; out[1] = this.lpR * 0.2 * this.T.g;
+};
+
+/* Низкий бурдон «Ом»: тоника на октаву ниже, гармоники с формантами гласной «о» */
+function Drone(st, t0) {
+  var r = ((moodOf(st).root || 0) % 12 + 12) % 12; if (r > 6) r -= 12;
+  var f = st.tuning / 8 * Math.pow(2, r / 12), hs = [], sum = 0;
+  for (var k = 1; k <= 10; k++) {
+    var fk = f * k, w = 0.5 / k + Math.exp(-Math.pow((fk - 470) / 170, 2)) + 0.55 * Math.exp(-Math.pow((fk - 820) / 250, 2));
+    hs.push({ fl: fk, fr: fk * 1.0025, pl: frac(fk * t0), pr: frac(fk * 1.0025 * t0), w: w }); sum += w;
+  }
+  hs.forEach(function (h) { h.w /= sum; });
+  this.hs = hs; this.g = 1; this.lp = 0; this.rp = 0;
+}
+Drone.prototype.control = function (t) { this.g = 0.72 + 0.28 * Math.sin(2 * Math.PI * t / 23 + 0.5 * Math.sin(2 * Math.PI * t / 61)); };
+Drone.prototype.tick = function (out) {
+  var L = 0, R = 0, hs = this.hs;
+  for (var k = 0; k < hs.length; k++) {
+    var h = hs[k];
+    L += h.w * TAB[(h.pl * TN) | 0]; R += h.w * TAB[(h.pr * TN) | 0];
+    h.pl += h.fl / SR; if (h.pl >= 1) h.pl -= 1;
+    h.pr += h.fr / SR; if (h.pr >= 1) h.pr -= 1;
+  }
+  this.lp += (L - this.lp) * 0.2; this.rp += (R - this.rp) * 0.2;
+  out[0] = this.lp * 0.42 * this.g; out[1] = this.rp * 0.42 * this.g;
 };
 
 function Bowls(st, t0, total) {
-  var mood = MOODS[st.mood] || MOODS.calm, base = st.tuning / 4, rnd = mkRng(777 + (st.seed || 0));
+  var mood = moodOf(st), base = st.tuning / 4, rnd = mkRng(777 + (st.seed || 0) * 131);
   var every = st.bowlEvery || 14, list = [], t = 3 + rnd() * 4, T = total / SR;
   var ratios = [1, 2.71, 5.15, 8.4], amps = [1, 0.42, 0.2, 0.09], dec = [9, 5.5, 2.6, 1.3];
   while (t < T) {
@@ -183,6 +227,107 @@ Bowls.prototype.tick = function (out) {
   out[0] = L * 0.24; out[1] = R * 0.24;
 };
 
+/* ---------- мелодия и колокольчики: ноты берутся из текущего аккорда ---------- */
+var INST = {
+  harp:    { p: [1, 2, 3, 4],        a: [1, 0.45, 0.22, 0.1],        d: [2.6, 1.5, 0.9, 0.5],       att: 0.004, g: 1 },
+  kalimba: { p: [1, 5.4, 9.1],       a: [1, 0.22, 0.07],             d: [1.7, 0.22, 0.1],           att: 0.002, g: 1.1 },
+  piano:   { p: [1, 2, 3, 4, 6],     a: [1, 0.38, 0.16, 0.08, 0.04], d: [3.2, 1.7, 1, 0.6, 0.35],   att: 0.006, g: 0.95 },
+  bells:   { p: [1, 2.76, 5.4, 8.93],a: [1, 0.45, 0.25, 0.12],       d: [4.5, 2.6, 1.4, 0.7],       att: 0.002, g: 0.8 },
+  flute:   { p: [1, 2, 3],           a: [1, 0.28, 0.09],             sus: true, att: 0.22, rel: 0.7, g: 1.1 }
+};
+function noteEvents(st, total, kind) {
+  var mood = moodOf(st), base = st.tuning / 4, rnd = mkRng(1234 + (st.seed || 0) * 97 + (kind === 'chimes' ? 555 : 0));
+  var dur = chordDur(st), n = mood.chords.length, T = total / SR, list = [];
+  function pool(t, lo, hi) {
+    var ch = mood.chords[Math.floor(t / dur) % n], out = [];
+    ch.forEach(function (x) { for (var o = 0; o <= 36; o += 12) { var f = base * Math.pow(2, (x + o) / 12); if (f >= lo && f <= hi && out.indexOf(f) < 0) out.push(f); } });
+    return out.sort(function (a, b) { return a - b; });
+  }
+  var t, P, j;
+  if (kind === 'chimes') {
+    t = 5 + rnd() * 6;
+    while (t < T) {
+      var cnt = 3 + Math.floor(rnd() * 5), tt = t;
+      for (j = 0; j < cnt; j++) {
+        P = pool(tt, 700, 2600);
+        if (P.length) list.push({ t: tt, f: P[Math.floor(rnd() * P.length)], pan: 0.15 + rnd() * 0.7, vel: 0.3 + rnd() * 0.5 });
+        tt += 0.1 + rnd() * 0.5;
+      }
+      t += 12 + rnd() * 22;
+    }
+    return list;
+  }
+  var inst = st.melInst || 'harp', sus = inst === 'flute', every = st.melEvery || 10, idx = -1;
+  var lo = sus ? 260 : 220, hi = sus ? 880 : 1000;
+  t = 4 + rnd() * 4;
+  while (t < T) {
+    P = pool(t, lo, hi); if (!P.length) { t += every; continue; }
+    var len = 2 + Math.floor(rnd() * (sus ? 2 : 4));
+    if (idx < 0 || idx >= P.length) idx = Math.floor(rnd() * P.length);
+    for (j = 0; j < len && t < T; j++) {
+      P = pool(t, lo, hi);
+      var r = rnd(), step = r < 0.35 ? -1 : r < 0.7 ? 1 : r < 0.85 ? -2 : 2;
+      idx = Math.max(0, Math.min(P.length - 1, idx + (j ? step : 0)));
+      var nd = sus ? 1.1 + rnd() * 1.3 : 0.35 + rnd() * 0.75;
+      list.push({ t: t, f: P[idx], pan: 0.35 + rnd() * 0.3, vel: 0.55 + rnd() * 0.4, len: sus ? nd * 0.9 : 0 });
+      t += nd;
+    }
+    t += every * (0.6 + 0.8 * rnd());
+  }
+  return list;
+}
+function Notes(list, inst, t0, seed) {
+  this.list = list; this.I = INST[inst] || INST.harp; this.idx = 0; this.active = []; this.r = mkRng(seed || 99);
+  var I = this.I, life = I.sus ? 0 : I.d[0] * 6;
+  for (var i = 0; i < list.length; i++) {
+    var s = list[i];
+    if (s.t > t0) { this.idx = i; break; }
+    this.idx = i + 1;
+    if (t0 - s.t < (I.sus ? s.len + I.rel : life)) this.start(s, t0);
+  }
+}
+Notes.prototype.start = function (s, t) {
+  var I = this.I, el = t - s.t;
+  s.parts = I.p.map(function (r, k) { return { f: s.f * r, a: I.a[k] * s.vel, d: I.d ? I.d[k] : 0, ph: frac(s.f * r * el), inc: s.f * r / SR, g: 0 }; });
+  s.env = 0; this.active.push(s);
+};
+Notes.prototype.control = function (t) {
+  while (this.idx < this.list.length && this.list[this.idx].t <= t) { this.start(this.list[this.idx], t); this.idx++; }
+  var I = this.I, act = [];
+  for (var i = 0; i < this.active.length; i++) {
+    var s = this.active[i], el = t - s.t, k;
+    if (I.sus) {
+      if (el > s.len + I.rel) continue;
+      var e = el < I.att ? el / I.att : 1;
+      if (el > s.len) e *= Math.max(0, 1 - (el - s.len) / I.rel);
+      var vib = el > 0.4 ? 1 + 0.0045 * Math.sin(2 * Math.PI * 5.2 * el) * Math.min(1, (el - 0.4) / 0.4) : 1;
+      s.env = e;
+      for (k = 0; k < s.parts.length; k++) { var p = s.parts[k]; p.g = p.a * e; p.inc = p.f * vib / SR; }
+    } else {
+      if (el > I.d[0] * 6) continue;
+      var at = Math.min(1, el / I.att);
+      for (k = 0; k < s.parts.length; k++) s.parts[k].g = s.parts[k].a * at * Math.exp(-el / s.parts[k].d);
+    }
+    act.push(s);
+  }
+  this.active = act;
+};
+Notes.prototype.tick = function (out) {
+  var L = 0, R = 0, sus = this.I.sus;
+  for (var i = 0; i < this.active.length; i++) {
+    var s = this.active[i], v = 0;
+    for (var k = 0; k < s.parts.length; k++) {
+      var p = s.parts[k];
+      v += p.g * TAB[(p.ph * TN) | 0];
+      p.ph += p.inc; if (p.ph >= 1) p.ph -= 1;
+    }
+    if (sus) v += (this.r() * 2 - 1) * 0.018 * s.env * s.vel; // дыхание флейты
+    L += v * (1 - s.pan); R += v * s.pan;
+  }
+  out[0] = L * 0.2 * this.I.g; out[1] = R * 0.2 * this.I.g;
+};
+
+/* ---------- природа ---------- */
 function Ocean(seed) { this.r = mkRng(seed); this.l1 = 0; this.r1 = 0; this.l2 = 0; this.r2 = 0; this.cL = 0.05; this.cR = 0.05; this.gL = 0; this.gR = 0; }
 Ocean.prototype.control = function (t) {
   function wave(t, ph) {
@@ -212,17 +357,186 @@ Rain.prototype.tick = function (out) {
   out[1] = (this.lr * 0.3 + d * 0.15 * this.dL) * this.g;
 };
 
-function Binaural(st, t0) {
-  var beats = { alpha: 10, theta: 6, delta: 2.5 };
-  this.fl = st.binCarrier || 200; this.fr = this.fl + (beats[st.binType] || 6);
-  this.pl = frac(this.fl * t0); this.pr = frac(this.fr * t0);
-}
-Binaural.prototype.tick = function (out) {
-  out[0] = TAB[(this.pl * TN) | 0] * 0.07; out[1] = TAB[(this.pr * TN) | 0] * 0.07;
-  this.pl += this.fl / SR; if (this.pl >= 1) this.pl -= 1;
-  this.pr += this.fr / SR; if (this.pr >= 1) this.pr -= 1;
+/* полосовой фильтр (Чемберлен) */
+function SVF() { this.lo = 0; this.bp = 0; }
+SVF.prototype.p = function (x, F, q) { this.lo += F * this.bp; var hi = x - this.lo - q * this.bp; this.bp += F * hi; return this.bp; };
+
+function Wind(seed) { this.r = mkRng(seed); this.fl = new SVF(); this.fr = new SVF(); this.Fl = 0.05; this.Fr = 0.05; this.gl = 0; this.gr = 0; }
+Wind.prototype.control = function (t) {
+  function c(t, ph) { return 0.5 + 0.5 * Math.sin(2 * Math.PI * t / 13 + ph + 0.8 * Math.sin(2 * Math.PI * t / 37 + ph)); }
+  function g(t, ph) { return 0.2 + 0.8 * Math.pow(0.5 + 0.5 * Math.sin(2 * Math.PI * t / 9.7 + ph + Math.sin(2 * Math.PI * t / 29 + ph)), 2); }
+  this.Fl = 2 * Math.sin(Math.PI * (220 + 600 * c(t, 0)) / SR); this.Fr = 2 * Math.sin(Math.PI * (220 + 600 * c(t, 1.3)) / SR);
+  this.gl = g(t, 0); this.gr = g(t, 0.7);
+};
+Wind.prototype.tick = function (out) {
+  out[0] = this.fl.p(this.r() * 2 - 1, this.Fl, 0.35) * this.gl * 0.55;
+  out[1] = this.fr.p(this.r() * 2 - 1, this.Fr, 0.35) * this.gr * 0.55;
 };
 
+function Stream(seed) {
+  this.r = mkRng(seed); this.f1 = new SVF(); this.f2 = new SVF(); this.f3 = new SVF(); this.f4 = new SVF();
+  this.a1 = 0.5; this.a2 = 0.5; this.a3 = 0.5; this.a4 = 0.5; this.bub = [];
+}
+Stream.prototype.control = function () {
+  var r = this.r;
+  function walk(a) { a += (r() - 0.5) * 0.35; return a < 0.15 ? 0.15 : a > 1 ? 1 : a; }
+  this.a1 = walk(this.a1); this.a2 = walk(this.a2); this.a3 = walk(this.a3); this.a4 = walk(this.a4);
+  if (r() < 0.012) this.bub.push({ f: 350 + r() * 650, ph: 0, a: 0.25 + r() * 0.5, pan: r() });
+};
+Stream.prototype.tick = function (out) {
+  var r = this.r, F1 = 0.17, F2 = 0.36;
+  var L = this.f1.p(r() * 2 - 1, F1, 0.28) * this.a1 + this.f2.p(r() * 2 - 1, F2, 0.3) * this.a2 * 0.7;
+  var R = this.f3.p(r() * 2 - 1, F1 * 1.08, 0.28) * this.a3 + this.f4.p(r() * 2 - 1, F2 * 0.93, 0.3) * this.a4 * 0.7;
+  if (this.bub.length) {
+    var keep = [];
+    for (var i = 0; i < this.bub.length; i++) {
+      var b = this.bub[i], v = TAB[(b.ph * TN) | 0] * b.a;
+      b.ph += b.f / SR; if (b.ph >= 1) b.ph -= 1; b.f *= 1.00008; b.a *= 0.9985;
+      L += v * (1 - b.pan); R += v * b.pan;
+      if (b.a > 0.01) keep.push(b);
+    }
+    this.bub = keep;
+  }
+  out[0] = L * 0.22; out[1] = R * 0.22;
+};
+
+/* птицы: свисты, трели, короткие щебетания, изредка мягкое воркование */
+function Birds(st, t0, total) {
+  var rnd = mkRng(4242 + (st.seed || 0) * 71), T = total / SR, list = [], t = 1.5 + rnd() * 3;
+  while (t < T) {
+    var type = rnd(), pan = 0.1 + rnd() * 0.8, vel = 0.35 + rnd() * 0.65, tt = t, k, n;
+    if (type < 0.4) {               // свист
+      var f = 2200 + rnd() * 1100, up = rnd() < 0.5 ? 1.25 : 0.8; n = 2 + Math.floor(rnd() * 3);
+      for (k = 0; k < n; k++) { var l = 0.12 + rnd() * 0.1; list.push({ t: tt, len: l, f0: f, f1: f * up, pan: pan, vel: vel }); tt += l + 0.06 + rnd() * 0.08; }
+    } else if (type < 0.7) {        // трель
+      var f2 = 3800 + rnd() * 1200; n = 6 + Math.floor(rnd() * 8);
+      for (k = 0; k < n; k++) { list.push({ t: tt, len: 0.035, f0: f2, f1: f2 * 0.92, pan: pan, vel: vel * 0.7 }); tt += 0.06; f2 *= 0.99; }
+    } else if (type < 0.94) {       // щебет
+      n = 1 + Math.floor(rnd() * 3);
+      for (k = 0; k < n; k++) { var f3 = 4200 + rnd() * 900; list.push({ t: tt, len: 0.07, f0: f3, f1: f3 * 0.55, pan: pan, vel: vel * 0.8 }); tt += 0.12 + rnd() * 0.1; }
+    } else {                        // воркование вдали
+      var f4 = 480 + rnd() * 80;
+      for (k = 0; k < 3; k++) { list.push({ t: tt, len: k === 1 ? 0.45 : 0.25, f0: f4 * (k === 1 ? 1.06 : 1), f1: f4 * 0.97, pan: pan, vel: vel * 0.9, low: 1 }); tt += 0.55; }
+    }
+    t = tt + 1.2 + rnd() * 5.5;
+  }
+  this.list = list; this.idx = 0; this.active = [];
+  while (this.idx < list.length && list[this.idx].t < t0) this.idx++;
+  this.t = t0;
+}
+Birds.prototype.control = function (t) { this.t = t; while (this.idx < this.list.length && this.list[this.idx].t <= t) { var s = this.list[this.idx++]; s.ph = 0; s.x = (t - s.t) / s.len; this.active.push(s); } };
+Birds.prototype.tick = function (out) {
+  var L = 0, R = 0, keep = [];
+  for (var i = 0; i < this.active.length; i++) {
+    var s = this.active[i];
+    if (s.x >= 1) continue;
+    var f = s.f0 + (s.f1 - s.f0) * s.x, e = Math.sin(Math.PI * s.x), v = TAB[(s.ph * TN) | 0] * e * e * s.vel;
+    if (s.low) v *= 1.6;
+    s.ph += f / SR; if (s.ph >= 1) s.ph -= 1; s.x += 1 / (s.len * SR);
+    L += v * (1 - s.pan); R += v * s.pan; keep.push(s);
+  }
+  this.active = keep;
+  out[0] = L * 0.32; out[1] = R * 0.32;
+};
+
+/* сверчки: короткие серии импульсов на высокой частоте */
+function Crickets(t0) {
+  this.c = [{ f: 4350, pan: 0.25, P: 0.93, o: 0.1, ph: 0 }, { f: 4720, pan: 0.78, P: 1.07, o: 0.47, ph: 0 }, { f: 4050, pan: 0.5, P: 1.31, o: 0.8, ph: 0, far: 0.45 }];
+  this.t = t0; this.sw = 1;
+}
+Crickets.prototype.control = function (t) { this.t = t; this.sw = 0.75 + 0.25 * Math.sin(2 * Math.PI * t / 41); };
+Crickets.prototype.tick = function (out) {
+  var L = 0, R = 0, t = this.t;
+  for (var i = 0; i < this.c.length; i++) {
+    var c = this.c[i], tc = t + c.o, nchirp = Math.floor(tc / c.P), loc = tc - nchirp * c.P, e = 0;
+    var h = frac(Math.sin(nchirp * 12.9898 + i * 78.233) * 43758.5453);
+    if (h > 0.18) { var pi = Math.floor(loc / 0.034); if (pi < 3) { var x = (loc - pi * 0.034) / 0.02; if (x < 1) { e = Math.sin(Math.PI * x); e *= e; } } }
+    var v = TAB[(c.ph * TN) | 0] * e * (c.far || 1);
+    c.ph += c.f / SR; if (c.ph >= 1) c.ph -= 1;
+    L += v * (1 - c.pan); R += v * c.pan;
+  }
+  this.t += 1 / SR;
+  out[0] = L * 0.3 * this.sw; out[1] = R * 0.3 * this.sw;
+};
+
+/* костёр: тёплый гул + потрескивания */
+function Fire(seed) { this.r = mkRng(seed); this.l = 0; this.rr = 0; this.cr = []; this.g = 1; this.pl = 0; this.pr = 0; }
+Fire.prototype.control = function (t) {
+  this.g = 0.75 + 0.25 * Math.sin(2 * Math.PI * t / 7 + Math.sin(2 * Math.PI * t / 3.1));
+  var r = this.r;
+  if (r() < 0.018) this.cr.push({ a: (r() < 0.12 ? 0.9 : 0.25) + r() * 0.35, d: 0.93 + r() * 0.05, pan: r() });
+};
+Fire.prototype.tick = function (out) {
+  var r = this.r, a = r() * 2 - 1, b = r() * 2 - 1;
+  this.l += (a - this.l) * 0.012; this.rr += (b - this.rr) * 0.012;
+  var L = this.l * 2.6 * this.g, R = this.rr * 2.6 * this.g;
+  if (this.cr.length) {
+    var keep = [], n = r() * 2 - 1, hp = n - this.pl; this.pl = n;
+    for (var i = 0; i < this.cr.length; i++) {
+      var c = this.cr[i], v = hp * c.a;
+      L += v * (1 - c.pan); R += v * c.pan; c.a *= c.d;
+      if (c.a > 0.004) keep.push(c);
+    }
+    this.cr = keep;
+  }
+  out[0] = L * 0.3; out[1] = R * 0.3;
+};
+
+/* мягкий «коричневый» шум — ровный, глухой, как шум далёкого водопада */
+function Brown(seed) { this.r = mkRng(seed); this.l = 0; this.rr = 0; }
+Brown.prototype.tick = function (out) {
+  this.l = (this.l + 0.02 * (this.r() * 2 - 1)) / 1.02; this.rr = (this.rr + 0.02 * (this.r() * 2 - 1)) / 1.02;
+  out[0] = this.l * 1.15; out[1] = this.rr * 1.15;
+};
+
+/* сердцебиение: «тук-тук» в спокойном ритме */
+function Heart(st, t0) { this.P = 60 / (st.hbBpm || 60); this.t = t0; this.lp = 0; }
+Heart.prototype.control = function (t) { this.t = t; };
+Heart.prototype.tick = function (out) {
+  var tc = this.t % this.P, v = 0, x;
+  if (tc < 0.3) { x = tc; v += Math.sin(2 * Math.PI * 52 * x) * Math.exp(-x / 0.06) * Math.min(1, x / 0.008); v += 0.35 * Math.sin(2 * Math.PI * 104 * x) * Math.exp(-x / 0.04) * Math.min(1, x / 0.008); }
+  if (tc > 0.27 && tc < 0.6) { x = tc - 0.27; v += 0.7 * (Math.sin(2 * Math.PI * 64 * x) + 0.35 * Math.sin(2 * Math.PI * 128 * x)) * Math.exp(-x / 0.045) * Math.min(1, x / 0.008); }
+  this.lp += (v - this.lp) * 0.3; this.t += 1 / SR;
+  out[0] = this.lp * 0.5; out[1] = this.lp * 0.5;
+};
+
+/* тон выбранной частоты (528 Гц и др.) — чистый мягкий тон с медленной «волной» */
+function Tone(st, t0) { this.f = st.toneHz || 528; this.p = frac(this.f * t0); this.q = frac(this.f * 1.0007 * t0); this.g = 1; }
+Tone.prototype.control = function (t) { this.g = 0.7 + 0.3 * Math.sin(2 * Math.PI * t / 11); };
+Tone.prototype.tick = function (out) {
+  var a = TAB[(this.p * TN) | 0], b = TAB[(this.q * TN) | 0];
+  this.p += this.f / SR; if (this.p >= 1) this.p -= 1;
+  this.q += this.f * 1.0007 / SR; if (this.q >= 1) this.q -= 1;
+  out[0] = a * 0.08 * this.g; out[1] = b * 0.08 * this.g;
+};
+
+/* ---------- ритмы мозга: бинауральные, монауральные, изохронные ----------
+   Несущая «по строю» = ля малой октавы (216 Гц при 432 / 220 при 440) — совпадает с музыкой.
+   Плавный вход: ритм начинается с альфы 10 Гц и за 5 минут опускается к выбранному. */
+var BEATS = { delta: 2.5, theta4: 4, theta: 6, schumann: 7.83, alpha8: 8, alpha: 10, smr: 12, beta: 15 };
+function Binaural(st, t0) {
+  this.fl = +st.binCarrier || st.tuning / 2; this.fb = BEATS[st.binType] || 6; this.mode = st.binMode || 'binaural';
+  this.R = (st.binRamp && this.fb < 10) ? 300 : 0; this.D = 10 - this.fb;
+  this.pl = frac(this.fl * t0); this.pr = frac(this.fl * t0 + this.beatInt(t0)); this.pb = frac(this.beatInt(t0));
+  this.cur = this.beatAt(t0); this.lp = 0;
+}
+Binaural.prototype.beatAt = function (t) { return this.R && t < this.R ? this.fb + this.D * (1 - t / this.R) : this.fb; };
+Binaural.prototype.beatInt = function (t) { var R = this.R; if (!R) return this.fb * t; return t < R ? this.fb * t + this.D * (t - t * t / (2 * R)) : this.fb * t + this.D * R / 2; };
+Binaural.prototype.control = function (t) { this.cur = this.beatAt(t); };
+Binaural.prototype.tick = function (out) {
+  var a = TAB[(this.pl * TN) | 0];
+  this.pl += this.fl / SR; if (this.pl >= 1) this.pl -= 1;
+  if (this.mode === 'iso') {
+    var e = 0.5 - 0.5 * TAB[(((this.pb + 0.25) % 1) * TN) | 0]; e = e * e;
+    this.pb += this.cur / SR; if (this.pb >= 1) this.pb -= 1;
+    this.lp += (e - this.lp) * 0.02;
+    out[0] = out[1] = a * this.lp * 0.09; return;
+  }
+  var b = TAB[(this.pr * TN) | 0];
+  this.pr += (this.fl + this.cur) / SR; if (this.pr >= 1) this.pr -= 1;
+  if (this.mode === 'mono') { out[0] = out[1] = (a + b) * 0.045; return; }
+  out[0] = a * 0.07; out[1] = b * 0.07;
+};
 /* ---------- обработка голоса ---------- */
 function Biquad(type, f, q) {
   var w = 2 * Math.PI * f / SR, c = Math.cos(w), s = Math.sin(w), al = s / (2 * q), a0;
@@ -264,16 +578,31 @@ function* renderGen(msg) {
   var warm = Math.min(from, SR * 2), startS = from - warm, t0 = startS / SR;
   var env = voiceEnvelopes(tl, st);
 
-  var pad = st.padVol > 0 ? new Pad(st, t0) : null;
-  var bowls = st.bowlVol > 0 ? new Bowls(st, t0, total) : null;
-  var ocean = st.oceanVol > 0 ? new Ocean(11) : null;
-  var rain = st.rainVol > 0 ? new Rain(23) : null;
-  var bin = st.binVol > 0 ? new Binaural(st, t0) : null;
+  // музыкальные слои: создаются только те, у которых громкость больше нуля
+  var layers = [];
+  function add(vol, mk) { if (+vol > 0) layers.push({ o: mk(), v: +vol / 100 }); }
+  add(st.padVol, function () { return new Pad(st, t0); });
+  add(st.droneVol, function () { return new Drone(st, t0); });
+  add(st.melVol, function () { return new Notes(noteEvents(st, total, 'melody'), st.melInst || 'harp', t0, 31); });
+  add(st.bowlVol, function () { return new Bowls(st, t0, total); });
+  add(st.chimeVol, function () { return new Notes(noteEvents(st, total, 'chimes'), 'bells', t0, 37); });
+  add(st.oceanVol, function () { return new Ocean(11); });
+  add(st.rainVol, function () { return new Rain(23); });
+  add(st.windVol, function () { return new Wind(41); });
+  add(st.streamVol, function () { return new Stream(53); });
+  add(st.birdVol, function () { return new Birds(st, t0, total); });
+  add(st.cricketVol, function () { return new Crickets(t0); });
+  add(st.fireVol, function () { return new Fire(67); });
+  add(st.brownVol, function () { return new Brown(71); });
+  add(st.hbVol, function () { return new Heart(st, t0); });
+  add(st.toneVol, function () { return new Tone(st, t0); });
+  add(st.binVol, function () { return new Binaural(st, t0); });
+  var NL = layers.length;
   var cust = (CUSTOM && st.customVol > 0) ? CUSTOM : null;
   var hp = new Biquad('hp', 85, 0.707), lpv = new Biquad('lp', 14000, 0.707);
   var rev = st.reverb > 0 ? new Reverb(st.reverbSize == null ? 0.6 : st.reverbSize) : null;
 
-  var pv = st.padVol / 100, bv = st.bowlVol / 100, ov = st.oceanVol / 100, rv = st.rainVol / 100, nv = st.binVol / 100, cv = st.customVol / 100;
+  var cv = st.customVol / 100;
   var music = db2g(st.musicDb), voiceG = db2g(st.voiceDb), duckDepth = 1 - db2g(-st.duckDb);
   var wet = st.reverb / 100 * 1.1, dry = 1 - st.reverb / 100 * 0.25;
   var gateFloor = st.gate ? db2g(-22) : 1;
@@ -290,14 +619,10 @@ function* renderGen(msg) {
     for (var s = cs; s < ce; s++) {
       if (((s - startS) & 63) === 0) {
         var t = s / SR;
-        if (pad) pad.control(t); if (bowls) bowls.control(t); if (ocean) ocean.control(t); if (rain) rain.control(t);
+        for (var li = 0; li < NL; li++) if (layers[li].o.control) layers[li].o.control(t);
       }
       var mL = 0, mR = 0;
-      if (pad) { pad.tick(tmp); mL += tmp[0] * pv; mR += tmp[1] * pv; }
-      if (bowls) { bowls.tick(tmp); mL += tmp[0] * bv; mR += tmp[1] * bv; }
-      if (ocean) { ocean.tick(tmp); mL += tmp[0] * ov; mR += tmp[1] * ov; }
-      if (rain) { rain.tick(tmp); mL += tmp[0] * rv; mR += tmp[1] * rv; }
-      if (bin) { bin.tick(tmp); mL += tmp[0] * nv; mR += tmp[1] * nv; }
+      for (var lj = 0; lj < NL; lj++) { var ly = layers[lj]; ly.o.tick(tmp); mL += tmp[0] * ly.v; mR += tmp[1] * ly.v; }
       if (cust && cN > 0) {
         var loc, kk;
         if (cP > 0) { kk = Math.floor(s / cP); loc = s - kk * cP; } else { kk = 0; loc = s % cN; }

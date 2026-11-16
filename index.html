@@ -77,6 +77,23 @@ input[type=range]{width:100%;accent-color:var(--sage)}
 .pill{display:inline-block;padding:3px 10px;border-radius:999px;background:#efe4d7;font-size:12px;font-weight:600;color:#6f5d53}
 .presets{display:flex;flex-wrap:wrap;gap:8px}
 .presets button{font-size:13.5px;padding:8px 13px}
+.presets button.on{background:var(--sage);border-color:var(--sage);color:#fff}
+.presets button.on.mod{background:#e9efe4;color:var(--sage-d);border-color:var(--sage)}
+.presets button .mk{font-size:11px;font-weight:700;margin-left:2px}
+.nowbox{margin-top:14px;background:#f3ebe0;border-radius:14px;padding:12px 14px;font-size:14px}
+.nowbox .chips2{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.nowbox .pill{background:#fff}
+.nowbox .pill.off{background:transparent;color:var(--muted);font-weight:500}
+details.help{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+details.help summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--sage-d);list-style:none}
+details.help summary::-webkit-details-marker{display:none}
+details.help[open] summary{margin-bottom:4px}
+.hb{font-size:14px;line-height:1.55;overflow-x:auto}
+.hb p{margin:8px 0} .hb ul,.hb ol{margin:6px 0;padding-left:20px} .hb li{margin:4px 0}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0;min-width:420px}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:#efe4d7}
+.playbar{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 10px;box-shadow:0 8px 28px rgba(90,60,40,.18);z-index:6}
 .timeline{display:flex;height:34px;border-radius:10px;overflow:hidden;background:#efe4d7;cursor:pointer;position:relative;margin:10px 0 4px}
 .timeline div{height:100%}
 .tl-m{background:repeating-linear-gradient(45deg,#e3d3c2,#e3d3c2 6px,#eadccd 6px,#eadccd 12px)}
@@ -174,50 +191,245 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
   <section class="panel" id="p-music">
     <div class="card">
       <h2>Медитативная музыка</h2>
-      <p class="muted small" style="margin-top:0">Музыка создаётся прямо в студии (звуковой синтез), поэтому она ваша и её можно продавать в составе медитаций. Каждый раз она звучит одинаково для одних и тех же настроек.</p>
-      <h3>Готовые шаблоны</h3>
-      <div class="presets" id="presets"></div>
+      <p class="muted small" style="margin-top:0">Вся музыка создаётся прямо в студии, поэтому она ваша, и её можно продавать в составе медитаций. При одних и тех же настройках она звучит одинаково.</p>
+      <details class="help">
+        <summary>📖 Как устроен этот раздел и как собрать свою музыку</summary>
+        <div class="hb">
+          <p><b>Музыка собирается из слоёв, как пирог.</b> У каждого слоя свой ползунок громкости. <b>0% — слой выключен</b>, и его не слышно. Все включённые слои звучат одновременно.</p>
+          <ol>
+            <li><b>Основа</b> — гармония и тембр: тёплые аккорды и при желании низкий бурдон. На ней держится всё остальное.</li>
+            <li><b>Инструменты</b> — мелодия, поющие чаши, колокольчики. Они дают «событиям» звучать поверх основы.</li>
+            <li><b>Природа</b> — море, лес, ручей, дождь, костёр, ночь… Создают место и картинку.</li>
+            <li><b>Частоты</b> — бинауральные ритмы и тон частоты. Это тихий вспомогательный фон для состояния.</li>
+          </ol>
+          <p><b>Шаблон</b> — готовый набор всех слоёв под тему. Нажмите шаблон, и он подсветится зелёным. Ниже в рамке «Сейчас звучит» появится всё, что он включил. Если после этого подвинуть любой ползунок, у шаблона появится пометка <span class="pill">изменён</span>. Ещё одно нажатие на тот же шаблон вернёт его исходные настройки.</p>
+          <p><b>Как варьировать, чтобы медитации не были похожи друг на друга:</b></p>
+          <ul>
+            <li><b>Правило 1+2+1:</b> одна основа, 1–2 инструмента, 1–2 звука природы. Больше слоёв — больше «каши». Лучше меньше, но выразительнее.</li>
+            <li>Начните с шаблона, ближе всего подходящего к теме, и поменяйте 1–2 вещи: другое настроение гармонии, другой тембр или инструмент мелодии.</li>
+            <li><b>«Вариант рисунка»</b> переставляет ноты мелодии, удары чаш, колокольчиков и голоса птиц. Настроение то же, а звучит по-новому. Удобно для серии похожих медитаций.</li>
+            <li><b>«Смена аккордов»</b>: медленнее — глубже и сонливее, быстрее — живее.</li>
+            <li>Кнопка <b>🎲 Случайное сочетание</b> собирает новую комбинацию. Если понравилось, допилите ползунками.</li>
+          </ul>
+          <p><b>Громкость здесь — это громкость слоёв относительно друг друга.</b> Общую громкость музыки относительно голоса настраивают во вкладке «Сведение» (ползунок «Громкость музыки»).</p>
+          <p><b>Слушайте результат</b> кнопкой внизу экрана «▶ Послушать музыку». Музыку лучше проверять в наушниках и на динамике телефона: так её услышит клиент.</p>
+        </div>
+      </details>
     </div>
+
     <div class="card">
+      <div class="row" style="justify-content:space-between"><h3 style="margin:0">Готовые шаблоны</h3><button class="mini" id="randomMix">🎲 Случайное сочетание</button></div>
+      <div class="presets" id="presets" style="margin-top:10px"></div>
+      <div class="nowbox" id="nowBox"></div>
+    </div>
+
+    <div class="card">
+      <h3>1. Основа — гармония и тембр</h3>
       <div class="grid2">
         <div><label class="f">Настроение гармонии</label>
           <select id="mood">
-            <option value="calm">Спокойствие (минор, мягко)</option>
-            <option value="light">Свет (мажор, тепло)</option>
-            <option value="deep">Глубина (низкий дрон, погружение)</option>
-            <option value="heart">Сердце (нежно, любовь, принятие)</option>
-            <option value="space">Космос (простор, лёгкость)</option>
+            <option value="calm">Спокойствие — мягкий минор, тишина</option>
+            <option value="light">Свет — тёплый мажор</option>
+            <option value="sunrise">Рассвет — светлый мажор, надежда</option>
+            <option value="heart">Сердце — нежность, любовь, принятие</option>
+            <option value="dream">Мечта — мягкие септаккорды, нежно</option>
+            <option value="forest">Лес — воздушный лидийский лад</option>
+            <option value="sea">Море — широко, открытые квинты</option>
+            <option value="crystal">Кристалл — высоко, прозрачно</option>
+            <option value="space">Космос — простор, невесомость</option>
+            <option value="deep">Глубина — низкий тон, погружение</option>
+            <option value="night">Ночь — низко, тихо, медленно</option>
+            <option value="ancient">Древность — бурдон, корни, род</option>
           </select></div>
-        <div><label class="f">Строй</label>
-          <select id="tuning"><option value="432">A = 432 Гц</option><option value="440">A = 440 Гц (стандарт)</option></select></div>
+        <div><label class="f">Тембр аккордов</label>
+          <select id="padTone">
+            <option value="warm">Тёплый — мягкий синтезатор</option>
+            <option value="soft">Бархатный — самый мягкий, для сна</option>
+            <option value="choir">Воздушный — как далёкий хор</option>
+            <option value="organ">Орган — ровный, светлый</option>
+            <option value="glass">Стеклянный — звонкий, кристальный</option>
+          </select></div>
       </div>
-      <div class="layer" style="margin-top:14px">
-        <div class="sl"><label>Пэд (тёплые аккорды)</label><input type="range" id="padVol" min="0" max="100"><span class="v" id="padVolV"></span></div>
+      <div class="sl"><label>Аккорды (основа)</label><input type="range" id="padVol" min="0" max="100"><span class="v" id="padVolV"></span></div>
+      <div class="sl"><label>Смена аккордов раз в</label><input type="range" id="chordSlow" min="50" max="250" step="10"><span class="v" id="chordSlowV"></span></div>
+      <div class="sl"><label>Низкий бурдон «Ом»</label><input type="range" id="droneVol" min="0" max="100"><span class="v" id="droneVolV"></span></div>
+      <div class="grid2" style="margin-top:6px">
+        <div><label class="f">Строй (высота всей музыки)</label>
+          <select id="tuning"><option value="432">A = 432 Гц — чуть ниже и мягче</option><option value="440">A = 440 Гц — стандартный строй</option></select></div>
+        <div><label class="f">Вариант рисунка</label>
+          <div class="sl" style="grid-template-columns:1fr 54px;margin:4px 0"><input type="range" id="seed" min="0" max="29"><span class="v" id="seedV"></span></div></div>
       </div>
-      <div class="layer">
-        <div class="sl"><label>Поющие чаши</label><input type="range" id="bowlVol" min="0" max="100"><span class="v" id="bowlVolV"></span></div>
-        <div class="sl"><label class="small muted">Удар примерно раз в</label><input type="range" id="bowlEvery" min="5" max="45"><span class="v" id="bowlEveryV"></span></div>
-      </div>
-      <div class="layer">
-        <div class="sl"><label>Океан</label><input type="range" id="oceanVol" min="0" max="100"><span class="v" id="oceanVolV"></span></div>
-        <div class="sl"><label>Дождь</label><input type="range" id="rainVol" min="0" max="100"><span class="v" id="rainVolV"></span></div>
-      </div>
-      <div class="layer">
-        <div class="sl"><label>Бинауральные ритмы</label><input type="range" id="binVol" min="0" max="100"><span class="v" id="binVolV"></span></div>
-        <div class="grid2">
-          <select id="binType">
-            <option value="alpha">Альфа 10 Гц — расслабленное бодрствование</option>
-            <option value="theta">Тета 6 Гц — глубокая медитация, транс</option>
-            <option value="delta">Дельта 2,5 Гц — сон</option>
-          </select>
-          <div class="small muted" style="align-self:center">Работают только в наушниках, держите их тихими (10–25%).</div>
+      <details class="help">
+        <summary>❓ Что это и как настраивать</summary>
+        <div class="hb">
+          <p><b>Настроение гармонии</b> — какие аккорды звучат и как они сменяют друг друга. Минорные (Спокойствие, Ночь, Глубина) — более интимные и задумчивые. Мажорные (Свет, Рассвет, Сердце) — светлые и обнадёживающие. Лес, Море, Космос и Кристалл — «открытые»: в них нет напряжения, только простор.</p>
+          <ul>
+            <li><b>Сон, глубокая релаксация</b> — Ночь, Глубина, Спокойствие.</li>
+            <li><b>Места силы</b> — Лес, Море, Рассвет (поле, солнце), Мечта (озеро).</li>
+            <li><b>Принятие, женственность, отношения</b> — Сердце, Мечта.</li>
+            <li><b>Род, регрессия, корни</b> — Древность, Глубина.</li>
+            <li><b>Утро, благодарность, ресурс</b> — Рассвет, Свет, Кристалл.</li>
+          </ul>
+          <p><b>Тембр</b> — «чем играют» аккорды. Бархатный почти не имеет верхов, лучше всего для сна. Воздушный похож на далёкий хор. Стеклянный звенит и подходит к теме света, кристалла, космоса. Орган ровный, без «дыхания», хорош для торжественных и родовых практик.</p>
+          <p><b>Смена аккордов</b> — как часто меняется гармония. Обычно 20–30 секунд. Для сна и погружения ставьте 40–60 с: музыка почти перестаёт «двигаться», и ум отпускает. Для утра и коротких практик — 15–20 с.</p>
+          <p><b>Низкий бурдон «Ом»</b> — непрерывный низкий тон на тонике, как гудение тибетской чаши или пение «Ом». Он «заземляет» и даёт чувство опоры. Хорош для Силы рода, регрессии и заземления: 20–45%. На маленьких динамиках телефона он слышен слабо — это нормально, в наушниках он на месте.</p>
+          <p><b>Строй 432 / 440 Гц</b> — высота всей музыки. 432 Гц звучит чуть ниже (примерно на треть полутона) и многим кажется мягче и теплее. 440 Гц — стандарт, на нём записано большинство музыки. Выберите тот, что нравится на слух. Если добавляете свою дорожку, ставьте её строй (чаще всего 440).</p>
+          <p><b>Вариант рисунка</b> (1–30) — «перетасовка». Меняет, какие ноты играет мелодия и когда звучат чаши, колокольчики и птицы. Гармония и настроение остаются прежними. Сделали серию медитаций в одном стиле — дайте каждой свой вариант.</p>
         </div>
-      </div>
-      <div class="row" style="margin-top:14px"><button id="musicPrev">▶ Послушать музыку 30 с</button><button class="ghost hidden" id="musicStop">■ Стоп</button><span class="small muted" id="musicStatus"></span></div>
+      </details>
     </div>
+
+    <div class="card">
+      <h3>2. Инструменты</h3>
+      <div class="sl"><label>Мелодия</label><input type="range" id="melVol" min="0" max="100"><span class="v" id="melVolV"></span></div>
+      <div class="grid2">
+        <div><label class="f">Инструмент мелодии</label>
+          <select id="melInst">
+            <option value="harp">Арфа — нежные переливы</option>
+            <option value="kalimba">Калимба — тёплые «капли»</option>
+            <option value="piano">Электропиано — мягкие ноты</option>
+            <option value="flute">Флейта — протяжная, дыхание</option>
+          </select></div>
+        <div><label class="f">Фраза примерно раз в</label>
+          <div class="sl" style="grid-template-columns:1fr 54px;margin:4px 0"><input type="range" id="melEvery" min="3" max="40"><span class="v" id="melEveryV"></span></div></div>
+      </div>
+      <div class="sl"><label>Поющие чаши</label><input type="range" id="bowlVol" min="0" max="100"><span class="v" id="bowlVolV"></span></div>
+      <div class="sl"><label class="small muted">Удар примерно раз в</label><input type="range" id="bowlEvery" min="5" max="45"><span class="v" id="bowlEveryV"></span></div>
+      <div class="sl"><label>Колокольчики ветра</label><input type="range" id="chimeVol" min="0" max="100"><span class="v" id="chimeVolV"></span></div>
+      <details class="help">
+        <summary>❓ Что это и как настраивать</summary>
+        <div class="hb">
+          <p><b>Мелодия</b> — короткие фразы из 2–5 нот с паузами между ними. Ноты всегда берутся из звучащего аккорда, поэтому мелодия <b>никогда не фальшивит</b> — при любом настроении и любом «варианте рисунка».</p>
+          <ul>
+            <li><b>Арфа</b> — самый универсальный выбор: расслабление, сердце, сон.</li>
+            <li><b>Калимба</b> — тёплая, «деревянная», похожа на капли. Подходит для леса, озера, детских медитаций.</li>
+            <li><b>Электропиано</b> — мягкое и современное: утро, ресурс, благодарность.</li>
+            <li><b>Флейта</b> — протяжные ноты с дыханием: поле, лес, костёр, медитации о пути.</li>
+          </ul>
+          <p><b>Фраза раз в N секунд.</b> 6–10 с — мелодия заметна, ведёт за собой. 15–30 с — изредка, как «напоминание». Под голос лучше реже (12–20 с) и тише (15–30%), чтобы мелодия не спорила со словами.</p>
+          <p><b>Поющие чаши</b> — удар чаши с долгим затуханием. Они «будят внимание», поэтому для сна их лучше выключить или поставить раз в 30–45 с. Для практик осознанности — раз в 12–20 с.</p>
+          <p><b>Колокольчики ветра</b> — редкие светлые перезвоны (раз в 15–30 с). Добавляют воздуха и сказочности: утро, благодарность, поле, космос. Держите их тихими: 8–20%.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>3. Природа</h3>
+      <div class="sl"><label>🌊 Море (волны)</label><input type="range" id="oceanVol" min="0" max="100"><span class="v" id="oceanVolV"></span></div>
+      <div class="sl"><label>🌧 Дождь</label><input type="range" id="rainVol" min="0" max="100"><span class="v" id="rainVolV"></span></div>
+      <div class="sl"><label>🌬 Ветер</label><input type="range" id="windVol" min="0" max="100"><span class="v" id="windVolV"></span></div>
+      <div class="sl"><label>💧 Ручей</label><input type="range" id="streamVol" min="0" max="100"><span class="v" id="streamVolV"></span></div>
+      <div class="sl"><label>🐦 Птицы</label><input type="range" id="birdVol" min="0" max="100"><span class="v" id="birdVolV"></span></div>
+      <div class="sl"><label>🦗 Ночь (сверчки)</label><input type="range" id="cricketVol" min="0" max="100"><span class="v" id="cricketVolV"></span></div>
+      <div class="sl"><label>🔥 Костёр</label><input type="range" id="fireVol" min="0" max="100"><span class="v" id="fireVolV"></span></div>
+      <div class="sl"><label>🌫 Мягкий шум</label><input type="range" id="brownVol" min="0" max="100"><span class="v" id="brownVolV"></span></div>
+      <div class="sl"><label>❤️ Сердцебиение</label><input type="range" id="hbVol" min="0" max="100"><span class="v" id="hbVolV"></span></div>
+      <div class="sl"><label class="small muted">Пульс</label><input type="range" id="hbBpm" min="48" max="72"><span class="v" id="hbBpmV"></span></div>
+      <details class="help">
+        <summary>❓ Что это и как настраивать</summary>
+        <div class="hb">
+          <ul>
+            <li><b>Море</b> — накатывающие волны с ритмом примерно раз в 10 секунд. Под этот ритм само собой замедляется дыхание. Морской берег, сон, расслабление.</li>
+            <li><b>Дождь</b> — ровный шелест с каплями. Уют, безопасность, «после работы», сон.</li>
+            <li><b>Ветер</b> — мягкие порывы. Поле, горы, простор, отпускание («ветер уносит»).</li>
+            <li><b>Ручей</b> — журчание воды. Лес, озеро, очищение, лёгкость.</li>
+            <li><b>Птицы</b> — свисты, трели, щебет и изредка воркование вдали. Лес, утро, поле. Для сна не подходят: они бодрят.</li>
+            <li><b>Ночь (сверчки)</b> — летняя ночь. Сон, вечер, костёр. Держите их тише (10–25%): высокий звук быстро утомляет.</li>
+            <li><b>Костёр</b> — тёплый гул и потрескивание. Сила рода, сказки, «у очага», вечерние практики.</li>
+            <li><b>Мягкий шум</b> («коричневый») — глухой ровный шум, как далёкий водопад или самолёт. Отлично маскирует бытовые звуки и помогает уснуть. Для сна 15–35%.</li>
+            <li><b>Сердцебиение</b> — спокойное «тук-тук». Даёт чувство безопасности, «как в утробе». Хорошо для регрессии, внутреннего ребёнка, Силы рода, тревоги. <b>Пульс</b> 54–60 успокаивает (ниже обычного пульса в покое). Если человек тревожен, не ставьте пульс выше 64: частое сердцебиение может усилить тревогу.</li>
+          </ul>
+          <p><b>Сколько природы включать.</b> Обычно 1–2 звука: например, море + ветер или ручей + птицы. Природа должна быть фоном, а не главным: 15–45%. Если звук природы — главный образ медитации (например, «место силы — морской берег»), его можно сделать громче (40–60%), а аккорды — тише.</p>
+          <p><b>Важно.</b> Птицы, костёр и сердцебиение — события. Под голос они не приглушаются так же незаметно, как ровные звуки. Поэтому держите их умеренными.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>4. Частоты: ритмы мозга и тоны</h3>
+      <div class="sl"><label>Ритмы мозга</label><input type="range" id="binVol" min="0" max="100"><span class="v" id="binVolV"></span></div>
+      <div class="grid2">
+        <div><label class="f">Частота ритма (на какое состояние)</label>
+          <select id="binType">
+            <option value="delta">Дельта 2,5 Гц — глубокий сон</option>
+            <option value="theta4">Тета 4 Гц — грань сна, гипноз, регрессия</option>
+            <option value="theta">Тета 6 Гц — глубокая медитация, образы</option>
+            <option value="schumann">7,83 Гц — «резонанс Шумана», заземление</option>
+            <option value="alpha8">Альфа 8 Гц — мягкое расслабление</option>
+            <option value="alpha">Альфа 10 Гц — спокойное бодрствование</option>
+            <option value="smr">12 Гц — спокойная собранность</option>
+            <option value="beta">Бета 15 Гц — бодрость, концентрация</option>
+          </select></div>
+        <div><label class="f">Способ</label>
+          <select id="binMode">
+            <option value="binaural">Бинауральные — только в наушниках</option>
+            <option value="mono">Монауральные — и в наушниках, и в динамиках</option>
+            <option value="iso">Изохронные — пульсация, слышна везде</option>
+          </select></div>
+        <div><label class="f">Несущий тон</label>
+          <select id="binCarrier">
+            <option value="0">По строю музыки (рекомендую)</option>
+            <option value="110">110 Гц — очень низкий, мягкий</option>
+            <option value="150">150 Гц — низкий</option>
+            <option value="200">200 Гц — средний</option>
+            <option value="300">300 Гц — выше, заметнее</option>
+          </select></div>
+        <div style="align-self:end"><label class="chk" style="margin:4px 0"><input type="checkbox" id="binRamp"> <span>Плавный вход: от альфы 10 Гц к выбранной частоте за 5 минут</span></label></div>
+      </div>
+      <div class="sl" style="margin-top:12px"><label>Тон частоты</label><input type="range" id="toneVol" min="0" max="100"><span class="v" id="toneVolV"></span></div>
+      <div><label class="f">Частота тона</label>
+        <select id="toneHz">
+          <option value="174">174 Гц — тело, снятие напряжения</option>
+          <option value="285">285 Гц — восстановление</option>
+          <option value="396">396 Гц — отпускание страха и вины</option>
+          <option value="417">417 Гц — перемены, новое начало</option>
+          <option value="432">432 Гц — гармония (совпадает со строем 432)</option>
+          <option value="528">528 Гц — любовь, «частота сердца»</option>
+          <option value="639">639 Гц — отношения, связь с людьми</option>
+          <option value="741">741 Гц — ясность, самовыражение</option>
+          <option value="852">852 Гц — интуиция</option>
+          <option value="963">963 Гц — единство, высшее «Я»</option>
+        </select></div>
+      <details class="help">
+        <summary>❓ Для чего герцы и ритмы, как их настраивать</summary>
+        <div class="hb">
+          <p><b>Что такое Гц (герц).</b> Это «сколько раз в секунду». У звука это высота тона: 100 Гц — низкий гул, 1000 Гц — высокий писк. Электрическая активность мозга тоже имеет ритмы, их тоже меряют в Гц, и у каждого состояния свой преобладающий ритм:</p>
+          <table class="tbl">
+            <tr><th>Ритм</th><th>Гц</th><th>Состояние</th><th>Для каких медитаций</th></tr>
+            <tr><td>Дельта</td><td>0,5–4</td><td>глубокий сон без сновидений</td><td>сон, засыпание</td></tr>
+            <tr><td>Тета</td><td>4–8</td><td>грань сна, глубокая медитация, яркие образы, гипнотический транс</td><td>регрессия, внутренний ребёнок, работа с образами, места силы, сила рода</td></tr>
+            <tr><td>Альфа</td><td>8–12</td><td>спокойное расслабленное бодрствование с закрытыми глазами</td><td>расслабление, после работы, гармония, тревога</td></tr>
+            <tr><td>SMR / низкая бета</td><td>12–15</td><td>спокойная собранность, ясная голова</td><td>утро, уверенность, перед важным делом</td></tr>
+            <tr><td>Бета</td><td>15–30</td><td>активное мышление, бодрость</td><td>короткие утренние настрои (не для расслабления)</td></tr>
+          </table>
+          <p><b>Как работают бинауральные ритмы.</b> В левое ухо подаётся тон, например 216 Гц, в правое — 222 Гц. Мозг сводит их и «слышит» пульсацию с разницей частот: 6 Гц. Считается, что ритмы мозга склонны подстраиваться под такую пульсацию (это называют «вовлечением»), и это помогает войти в нужное состояние. Действие мягкое и индивидуальное: у одних оно заметное, у других почти не ощущается. Поэтому это <b>вспомогательный слой</b>, а главное в медитации — ваш голос и текст.</p>
+          <p><b>Способы:</b></p>
+          <ul>
+            <li><b>Бинауральные</b> — классика, самые незаметные на слух. Работают <b>только в наушниках</b>: в каждое ухо должен попасть свой тон. В описании медитации напишите: «слушать в наушниках».</li>
+            <li><b>Монауральные</b> — оба тона в обоих каналах, пульсация слышна уже в воздухе. Работают и через динамик телефона или колонку.</li>
+            <li><b>Изохронные</b> — один тон, который включается и выключается с нужной частотой. Самые заметные и работают везде, но могут раздражать. Держите их очень тихими (5–12%).</li>
+          </ul>
+          <p><b>Несущий тон</b> — высота тех тонов, из которых сделан ритм. «По строю музыки» — это нота ля (216 или 220 Гц): тон совпадает с гармонией и не «спорит» с ней. Ниже (110–150 Гц) — мягче и незаметнее, но на маленьких динамиках почти не слышно. Выше (300 Гц) — заметнее.</p>
+          <p><b>Плавный вход.</b> Мозгу проще идти вниз постепенно. С галочкой ритм начинается с альфы 10 Гц (обычное расслабленное состояние) и за первые 5 минут плавно опускается к выбранной частоте. Рекомендую для сна, тета и регрессии.</p>
+          <p><b>Громкость: 8–20%.</b> Ритм должен быть едва слышен, как фон. Громче он не работает лучше, а только утомляет. Во время прослушивания сделайте так, чтобы вы еле-еле различали ровный тон.</p>
+          <p><b>Тон частоты</b> — чистый мягкий тон выбранной частоты. В медитативных практиках эти частоты (их называют «сольфеджио») традиционно связывают с состояниями из списка. Чаще всего выбирают 528 Гц (любовь, сердце), 396 Гц (отпускание), 174 Гц (тело). Тон стоит на одной ноте, а музыка в строе 432/440, поэтому он может слегка «спорить» с аккордами. Держите его тихим, 3–10%. Если нужен тон, совпадающий с музыкой, выберите 432 Гц при строе 432.</p>
+          <p><b>Готовые сочетания:</b></p>
+          <ul>
+            <li><b>Сон</b> — дельта 2,5 Гц, бинауральные, плавный вход, 12–18%.</li>
+            <li><b>Регрессия, внутренний ребёнок</b> — тета 4 Гц, плавный вход, 15–20%.</li>
+            <li><b>Места силы, визуализации</b> — тета 6 Гц, 12–18%.</li>
+            <li><b>Расслабление, тревога, после работы</b> — альфа 8–10 Гц, 10–15%.</li>
+            <li><b>Сила рода, заземление</b> — 7,83 Гц, 12–15%.</li>
+            <li><b>Утро</b> — 12 Гц, 10%, без плавного входа.</li>
+          </ul>
+          <p class="warn note"><b>Осторожно:</b> медитации с дельта- и тета-ритмами нельзя слушать за рулём и при работе с техникой. Людям с эпилепсией ритмичные звуки (особенно изохронные) лучше не использовать. Хорошо бы добавить это в описание медитации для продажи.</p>
+        </div>
+      </details>
+    </div>
+
     <div class="card">
       <h3>Своя музыкальная дорожка</h3>
-      <p class="muted small" style="margin-top:0">Можно добавить свой файл: он зациклится на всю длину медитации с плавными переходами. <b>Для продажи используйте только музыку, на которую у вас есть лицензия</b> (собственная, купленная с правом коммерческого использования или royalty‑free с разрешением на продажу).</p>
+      <p class="muted small" style="margin-top:0">Можно добавить свой файл: он зациклится на всю длину медитации с плавными переходами и будет звучать вместе со слоями выше (выключите лишние слои, если нужна только ваша дорожка). <b>Для продажи используйте только музыку, на которую у вас есть лицензия</b> (собственная, купленная с правом коммерческого использования или royalty‑free с разрешением на продажу).</p>
       <div class="row">
         <label class="btn" style="cursor:pointer">＋ Выбрать файл<input type="file" id="customFile" accept="audio/*,.mp3,.m4a,.wav,.ogg" hidden></label>
         <span id="customName" class="small muted">Не выбрано</span>
@@ -225,12 +437,14 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       </div>
       <div class="sl"><label>Громкость дорожки</label><input type="range" id="customVol" min="0" max="100"><span class="v" id="customVolV"></span></div>
     </div>
-  </section>
 
+    <div class="playbar"><button class="primary" id="musicPrev">▶ Послушать музыку 40 с</button><button class="ghost hidden" id="musicStop">■ Стоп</button><span class="small muted" id="musicStatus"></span></div>
+  </section>
   <!-- ============ СВЕДЕНИЕ ============ -->
   <section class="panel" id="p-mix">
     <div class="card">
       <h2>Сведение</h2>
+      <p class="muted small" style="margin-top:0">Здесь голос и музыка соединяются в одну медитацию. Вы задаёте, сколько музыки звучит до и после голоса, насколько она тише голоса и как обработать голос.</p>
       <div class="row" style="gap:22px">
         <div><div class="small muted">Длительность</div><div class="stat" id="totDur">0:00</div></div>
         <div><div class="small muted">Голос</div><div class="stat" id="totVoice">0:00</div></div>
@@ -243,6 +457,20 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
         <button class="ghost hidden" id="prevStop">■ Стоп</button>
         <span class="small muted" id="prevStatus"></span>
       </div>
+      <div class="nowbox" id="nowBox2"></div>
+      <details class="help">
+        <summary>📖 Как работать со сведением: порядок действий</summary>
+        <div class="hb">
+          <ol>
+            <li><b>Музыка.</b> Во вкладке «Музыка» выберите шаблон или соберите свои слои. Что выбрано, видно в рамке выше.</li>
+            <li><b>Структура.</b> Задайте вступление и завершение (сколько музыки до и после голоса).</li>
+            <li><b>Баланс.</b> Нажмите на полосу времени в любом месте, где есть голос, и включите «▶ Слушать с отметки». Двигайте «Громкость музыки», пока голос не станет ясным, а музыка — ощутимой, но не мешающей.</li>
+            <li><b>Проверка.</b> Послушайте начало, одну паузу между фрагментами и конец. Лучше дважды: в наушниках и через динамик телефона.</li>
+            <li><b>Создание.</b> Заполните название и описание и нажмите «✦ Создать MP3».</li>
+          </ol>
+          <p>Полоса времени показывает всю медитацию: светлое — только музыка, сиреневое — голос, бледно-сиреневое — паузы для практики. Нажмите на любое место — прослушивание начнётся оттуда.</p>
+        </div>
+      </details>
     </div>
 
     <div class="card">
@@ -250,9 +478,21 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       <div class="sl"><label>Вступление (музыка до голоса)</label><input type="range" id="intro" min="0" max="120"><span class="v" id="introV"></span></div>
       <div class="sl"><label>Завершение (музыка после)</label><input type="range" id="outro" min="5" max="600" step="5"><span class="v" id="outroV"></span></div>
       <div class="sl"><label>Не короче, мин</label><input type="range" id="minTotal" min="0" max="90"><span class="v" id="minTotalV"></span></div>
-      <div class="small muted" style="margin:-2px 0 6px">Для медитаций на сон: музыка продолжится после голоса до этой длительности.</div>
       <div class="sl"><label>Плавное появление</label><input type="range" id="fadeIn" min="0" max="30"><span class="v" id="fadeInV"></span></div>
       <div class="sl"><label>Плавное затухание</label><input type="range" id="fadeOut" min="2" max="120"><span class="v" id="fadeOutV"></span></div>
+      <details class="help">
+        <summary>❓ Что это и какие значения ставить</summary>
+        <div class="hb">
+          <ul>
+            <li><b>Вступление</b> — сколько музыка звучит одна, до первого слова. Даёт человеку устроиться и надеть наушники. Обычно 15–25 с. Для сна и глубоких практик 30–45 с. Для коротких «скорых» практик 5–10 с.</li>
+            <li><b>Завершение</b> — сколько музыка звучит после последнего слова. Для медитаций с выходом («на счёт три откройте глаза») 20–40 с. Для сна 2–5 минут и больше, чтобы человек засыпал под музыку, а не в тишине.</li>
+            <li><b>Не короче, мин</b> — общая минимальная длина. Если голос закончился раньше, музыка продолжится до этой длины. Для сна ставьте 30–60 минут. Для обычных медитаций — «—» (выключено).</li>
+            <li><b>Плавное появление</b> — за сколько секунд музыка нарастает от тишины в начале. 5–10 с — мягко. 0 — музыка начинается сразу.</li>
+            <li><b>Плавное затухание</b> — за сколько секунд всё стихает в конце. 10–20 с для обычных медитаций, 60–120 с для сна (затухание почти незаметно).</li>
+          </ul>
+          <p>Паузы между фрагментами (время на дыхание, визуализацию, тишину) задаются в каждом фрагменте во вкладке «Голос».</p>
+        </div>
+      </details>
     </div>
 
     <div class="card">
@@ -261,8 +501,44 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
       <div class="sl"><label>Громкость музыки</label><input type="range" id="musicDb" min="-30" max="0"><span class="v" id="musicDbV"></span></div>
       <div class="sl"><label>Приглушать музыку под голосом</label><input type="range" id="duckDb" min="0" max="15"><span class="v" id="duckDbV"></span></div>
       <div class="sl"><label>Объём (реверберация)</label><input type="range" id="reverb" min="0" max="60"><span class="v" id="reverbV"></span></div>
+      <div class="sl"><label>Размер пространства</label><input type="range" id="reverbSize" min="0" max="1" step="0.05"><span class="v" id="reverbSizeV"></span></div>
       <label class="chk"><input type="checkbox" id="comp"> <span>Компрессор — ровная, «бархатная» громкость голоса</span></label>
       <label class="chk"><input type="checkbox" id="gate"> <span>Тишина между фразами — убирает фоновое шипение в паузах</span></label>
+      <details class="help">
+        <summary>❓ Что это и какие значения ставить</summary>
+        <div class="hb">
+          <p><b>дБ (децибел)</b> — единица громкости. +6 дБ — примерно вдвое громче, −6 дБ — вдвое тише. Минус 3 дБ на слух — заметно, но немного.</p>
+          <ul>
+            <li><b>Громкость голоса</b> — обычно 0 дБ: студия уже выравнивает голос во всех фрагментах. Поднимайте до +2…+4, только если голос в целом тихий.</li>
+            <li><b>Громкость музыки</b> — главная ручка баланса. <b>−8 дБ</b> — музыка хорошо слышна. <b>−12…−14 дБ</b> — музыка как фон, голос впереди (рекомендую для медитаций с большим текстом). <b>−4…−6 дБ</b> — для медитаций, где мало слов и много музыки.</li>
+            <li><b>Приглушать музыку под голосом</b> — пока вы говорите, музыка автоматически становится тише на это значение, а в паузах мягко возвращается. 4–8 дБ — естественно и незаметно. Больше 10 — музыка начнёт «качаться». «Нет» — музыка всё время одной громкости.</li>
+            <li><b>Объём (реверберация)</b> — эхо помещения вокруг голоса. Голос становится объёмным и «обволакивающим». 10–20% — естественно. 25–35% — медитативно, «в пространстве». Больше 40% — голос уходит вдаль и теряет разборчивость.</li>
+            <li><b>Размер пространства</b> — комната (близко, интимно), зал (по умолчанию) или храм (длинный хвост, торжественно). Для сна и сердечных практик — комната или зал. Для рода, космоса и регрессии — храм с объёмом 20–25%.</li>
+            <li><b>Компрессор</b> — выравнивает тихие и громкие слова, голос звучит ровно и «по-радийному» близко. Держите включённым.</li>
+            <li><b>Тишина между фразами</b> — в паузах между словами убирает фоновое шипение и шум комнаты. Держите включённым. Если кажется, что обрезаются тихие окончания слов, выключите.</li>
+          </ul>
+          <p><b>Если что-то не так:</b></p>
+          <table class="tbl">
+            <tr><th>Слышно</th><th>Что сделать</th></tr>
+            <tr><td>Голос тонет в музыке</td><td>Громкость музыки −2…−4 дБ или приглушение +2 дБ</td></tr>
+            <tr><td>Музыки почти не слышно</td><td>Громкость музыки +2…+3 дБ или приглушение меньше</td></tr>
+            <tr><td>Музыка «качается» вверх-вниз</td><td>Уменьшите приглушение до 4–6 дБ</td></tr>
+            <tr><td>Голос как в бочке, неразборчиво</td><td>Объём меньше (10–15%), пространство — комната</td></tr>
+            <tr><td>Голос «сухой», плоский</td><td>Объём 20–25%</td></tr>
+            <tr><td>Шипение в паузах</td><td>Включите «Тишина между фразами»</td></tr>
+            <tr><td>Один фрагмент громче или тише других</td><td>Вкладка «Голос» → громкость фрагмента ±дБ</td></tr>
+            <tr><td>Слишком громкие «события» (чаши, птицы)</td><td>Вкладка «Музыка» → уменьшите этот слой</td></tr>
+          </table>
+          <p><b>Готовые сочетания:</b></p>
+          <ul>
+            <li><b>Сон</b> — музыка −10, приглушение 5, объём 22% (зал), завершение 3–5 мин, «не короче» 30–60 мин, затухание 90 с.</li>
+            <li><b>Расслабление, места силы</b> — музыка −8…−10, приглушение 6, объём 18–22%.</li>
+            <li><b>Много текста (работа с убеждениями, обида, диалог с телом)</b> — музыка −12…−14, приглушение 6–8, объём 15%.</li>
+            <li><b>Сила рода, регрессия</b> — музыка −10, объём 24%, пространство «храм».</li>
+            <li><b>Утро, короткие практики</b> — музыка −8, объём 12–14%, вступление 8–10 с, завершение 20–30 с.</li>
+          </ul>
+        </div>
+      </details>
     </div>
 
     <div class="card">
@@ -278,15 +554,21 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
         <button class="primary big" id="exportBtn">✦ Создать MP3</button>
         <button class="ghost danger hidden" id="exportCancel">Остановить</button>
       </div>
+      <details class="help">
+        <summary>❓ Качество MP3 и описание</summary>
+        <div class="hb">
+          <p><b>Качество «Авто»</b> выбирает самый лёгкий файл без слышимой потери. Голос и мягкая музыка звучат в моно 96 кбит/с так же, как в стерео. Если включены бинауральные ритмы или своя стерео-дорожка, автоматически выбирается стерео 128 кбит/с: бинауральные ритмы в моно не работают. Монауральные и изохронные ритмы работают и в моно.</p>
+          <p><b>В описании для продажи</b> полезно указать: для чего медитация, длительность, как слушать (лёжа или сидя, в наушниках — если есть бинауральные ритмы), когда слушать (перед сном, утром). Для медитаций с ритмами мозга добавьте: «не слушать за рулём».</p>
+        </div>
+      </details>
       <div id="exportProg" class="hidden">
         <div class="prog"><i id="exportBar"></i></div>
         <div class="small muted" id="exportTxt"></div>
-        <div class="note small" style="margin-top:8px">Не закрывайте вкладку и не блокируйте экран, пока идёт создание. Примерная скорость: 10–20 минут медитации собираются за 1–4 минуты (на телефоне дольше). Прослушать целиком перед созданием можно кнопкой «▶ Слушать с отметки» выше.</div>
+        <div class="note small" style="margin-top:8px">Не закрывайте вкладку и не блокируйте экран, пока идёт создание. Примерная скорость: 10–20 минут медитации собираются за 1–4 минуты (на телефоне дольше, особенно когда включено много слоёв). Прослушать целиком перед созданием можно кнопкой «▶ Слушать с отметки» выше.</div>
       </div>
       <div id="exportDone" class="hidden" style="margin-top:14px"></div>
     </div>
   </section>
-
   <!-- ============ БИБЛИОТЕКА ============ -->
   <section class="panel" id="p-library">
     <div class="card">
@@ -637,15 +919,26 @@ function mkRng(seed) { var s = (seed >>> 0) || 1; return function () { s ^= s <<
 var VOICE = {};           // id -> Float32Array (моно, 44100, нормализовано)
 var CUSTOM = null;        // {L, R}
 
-/* ---------- лады / настроения ---------- */
+/* ---------- лады / настроения ----------
+   Числа — полутоны от ноты A (ля) нижней октавы. root — тоника для бурдона.
+   Все аккорды каждого настроения взяты из одного лада, поэтому мелодия, чаши и колокольчики,
+   которые берут ноты из текущего аккорда, никогда не фальшивят. */
 var MOODS = {
-  calm:  { dur: 24, chords: [[0,7,12,15,19],[-4,3,7,12,15],[3,10,14,19],[-5,2,5,10,14]], bowls: [12,15,17,19,22,24] },
-  light: { dur: 24, chords: [[3,10,14,17,19],[-4,3,7,10,12],[0,7,10,12,15],[-2,5,12,14]], bowls: [15,17,19,22,24,27] },
-  deep:  { dur: 30, chords: [[-7,0,5,12],[-7,-2,5,10],[-9,-2,3,10]], bowls: [5,10,12,15,17] },
-  space: { dur: 28, chords: [[0,7,14,16,18],[-3,4,11,14,16],[2,9,16,18,23]], bowls: [12,14,16,18,19,23] },
-  heart: { dur: 26, chords: [[-7,0,5,9,12],[-2,5,9,14],[0,4,7,12,16],[-4,3,8,12]], bowls: [12,16,19,21,24] }
+  calm:    { dur: 24, root: 0, chords: [[0,7,12,15,19],[-4,3,7,12,15],[3,10,14,19],[-5,2,5,10,14]], bowls: [12,15,17,19,22,24] },
+  light:   { dur: 24, root: 3, chords: [[3,10,14,17,19],[-4,3,7,10,12],[0,7,10,12,15],[-2,5,12,14]], bowls: [15,17,19,22,24,27] },
+  deep:    { dur: 30, root: 5, chords: [[-7,0,5,12],[-7,-2,5,10],[-9,-2,3,10]], bowls: [5,10,12,15,17] },
+  space:   { dur: 28, root: 0, chords: [[0,7,14,16,18],[-3,4,11,14,16],[2,9,16,18,23]], bowls: [12,14,16,18,19,23] },
+  heart:   { dur: 26, root: 5, chords: [[-7,0,5,9,12],[-2,5,9,14],[0,4,7,12,16],[-4,3,8,12]], bowls: [12,16,19,21,24] },
+  forest:  { dur: 26, root: 0, chords: [[0,7,12,16,18],[2,9,14,18,21],[-5,2,7,11,14],[-3,4,9,12,16]], bowls: [12,14,16,18,19,21] },
+  sea:     { dur: 30, root: 0, chords: [[0,7,12,14,19],[-5,2,7,9,14],[-3,4,9,11,16],[-7,0,5,7,12]], bowls: [12,14,16,19,21,24] },
+  dream:   { dur: 28, root: 0, chords: [[0,4,11,14,16],[-7,-3,4,7,9],[-8,-5,-1,2,7],[-10,-7,-3,0,4]], bowls: [11,14,16,19,23] },
+  night:   { dur: 36, root: 0, chords: [[-12,-5,0,3,7],[-16,-9,-4,0,3],[-14,-7,-2,2,5]], bowls: [7,10,12,15] },
+  ancient: { dur: 32, root: 0, chords: [[-12,-5,0,3,7],[-12,-5,2,5,9],[-12,-5,-2,5,10],[-12,-5,0,5,9]], bowls: [0,5,7,12,15,17] },
+  sunrise: { dur: 22, root: 0, chords: [[0,4,7,12,16],[-5,-1,2,7,11],[-3,0,4,9,12],[-7,-3,0,5,9]], bowls: [12,16,19,21,24] },
+  crystal: { dur: 26, root: 0, chords: [[12,19,24,26,31],[7,14,19,23,26],[9,16,21,24,28],[5,12,17,21,24]], bowls: [24,26,28,31,33,36] }
 };
-
+function moodOf(st) { return MOODS[st.mood] || MOODS.calm; }
+function chordDur(st) { return moodOf(st).dur * ((st.chordSlow || 100) / 100); }
 /* ---------- построение таймлайна голоса ---------- */
 function buildTimeline(st, order) {
   var t = Math.round(st.intro * SR), segs = [];
@@ -705,38 +998,45 @@ function voiceEnvelopes(tl, st) {
 }
 
 /* ---------- генераторы ---------- */
+/* Тембры пэда: det — расстройка (ширина), c — октава, d — верхний обертон, lp — яркость, br — «дыхание» */
+var PADTONES = {
+  warm:  { det: 0.0015, c: 0.12, d: 0,    lp: 0.12, g: 1,    br: 0.28 },
+  soft:  { det: 0.001,  c: 0,    d: 0,    lp: 0.05, g: 1.05, br: 0.2 },
+  choir: { det: 0.0045, c: 0.22, d: 0.1,  lp: 0.22, g: 0.95, br: 0.36 },
+  organ: { det: 0.0007, c: 0.42, d: 0.24, lp: 0.3,  g: 0.7,  br: 0.06 },
+  glass: { det: 0.002,  c: 0.3,  d: 0.17, lp: 0.42, g: 0.9, br: 0.45, dr: 4.007 }
+};
 function Pad(st, t0) {
-  var mood = MOODS[st.mood] || MOODS.calm, base = st.tuning / 4; // A2
+  var mood = moodOf(st), base = st.tuning / 4, T = PADTONES[st.padTone] || PADTONES.warm, det = T.det, dr = T.dr || 3.003;
   var chords = mood.chords.map(function (ch) {
     return ch.map(function (n, k) {
       var f = base * Math.pow(2, n / 12);
       return {
-        f1: f * 0.9985, f2: f * 1.0015, f3: f * 2.001,
-        p1: frac(f * 0.9985 * t0), p2: frac(f * 1.0015 * t0), p3: frac(f * 2.001 * t0),
-        lf: 0.021 + 0.013 * k, lp: k * 1.7, amp: 1 / Math.sqrt(ch.length) * (f < 90 ? 0.8 : 1)
+        f1: f * (1 - det), f2: f * (1 + det), f3: f * 2.001, f4: f * dr,
+        p1: frac(f * (1 - det) * t0), p2: frac(f * (1 + det) * t0), p3: frac(f * 2.001 * t0), p4: frac(f * dr * t0),
+        lf: 0.021 + 0.013 * k, lp: k * 1.7, amp: 1 / Math.sqrt(ch.length) * (f < 90 ? 0.8 : 1) * (f > 500 ? 0.75 : 1)
       };
     });
   });
-  this.chords = chords; this.dur = mood.dur; this.xf = 9;
+  this.T = T; this.chords = chords; this.dur = chordDur(st); this.xf = Math.min(9 * this.dur / mood.dur, this.dur * 0.45);
   this.lpL = 0; this.lpR = 0;
   this.w = new Float32Array(chords.length);
 }
 Pad.prototype.control = function (t) {
-  var n = this.chords.length, pos = t / this.dur, i = Math.floor(pos) % n, loc = t - Math.floor(pos) * this.dur;
+  var n = this.chords.length, pos = t / this.dur, i = Math.floor(pos) % n, loc = t - Math.floor(pos) * this.dur, br = this.T.br;
   for (var k = 0; k < n; k++) this.w[k] = 0;
   var x = loc < this.xf ? loc / this.xf : 1;
   var prev = (i - 1 + n) % n;
   if (t < this.xf) x = 1;
   this.w[i] = Math.sin(x * Math.PI / 2);
   if (x < 1) this.w[prev] = Math.cos(x * Math.PI / 2);
-  // «дыхание» нот
   for (k = 0; k < n; k++) {
     var ch = this.chords[k];
-    for (var j = 0; j < ch.length; j++) ch[j].g = this.w[k] * ch[j].amp * (0.72 + 0.28 * Math.sin(2 * Math.PI * ch[j].lf * t + ch[j].lp));
+    for (var j = 0; j < ch.length; j++) ch[j].g = this.w[k] * ch[j].amp * ((1 - br) + br * Math.sin(2 * Math.PI * ch[j].lf * t + ch[j].lp));
   }
 };
 Pad.prototype.tick = function (out) {
-  var L = 0, R = 0, chords = this.chords;
+  var L = 0, R = 0, chords = this.chords, cw = this.T.c, dw = this.T.d;
   for (var k = 0; k < chords.length; k++) {
     if (this.w[k] <= 0) continue;
     var ch = chords[k];
@@ -746,16 +1046,42 @@ Pad.prototype.tick = function (out) {
       o.p1 += o.f1 / SR; if (o.p1 >= 1) o.p1 -= 1;
       o.p2 += o.f2 / SR; if (o.p2 >= 1) o.p2 -= 1;
       o.p3 += o.f3 / SR; if (o.p3 >= 1) o.p3 -= 1;
-      L += g * (a * 0.75 + b * 0.25 + c * 0.12);
-      R += g * (a * 0.25 + b * 0.75 + c * 0.12);
+      var cl = a * 0.75 + b * 0.25 + c * cw, cr = a * 0.25 + b * 0.75 + c * cw;
+      if (dw) { var d = TAB[(o.p4 * TN) | 0]; o.p4 += o.f4 / SR; if (o.p4 >= 1) o.p4 -= 1; cl += d * dw; cr += d * dw * 0.9; }
+      L += g * cl; R += g * cr;
     }
   }
-  this.lpL += (L - this.lpL) * 0.12; this.lpR += (R - this.lpR) * 0.12;
-  out[0] = this.lpL * 0.2; out[1] = this.lpR * 0.2;
+  var lp = this.T.lp;
+  this.lpL += (L - this.lpL) * lp; this.lpR += (R - this.lpR) * lp;
+  out[0] = this.lpL * 0.2 * this.T.g; out[1] = this.lpR * 0.2 * this.T.g;
+};
+
+/* Низкий бурдон «Ом»: тоника на октаву ниже, гармоники с формантами гласной «о» */
+function Drone(st, t0) {
+  var r = ((moodOf(st).root || 0) % 12 + 12) % 12; if (r > 6) r -= 12;
+  var f = st.tuning / 8 * Math.pow(2, r / 12), hs = [], sum = 0;
+  for (var k = 1; k <= 10; k++) {
+    var fk = f * k, w = 0.5 / k + Math.exp(-Math.pow((fk - 470) / 170, 2)) + 0.55 * Math.exp(-Math.pow((fk - 820) / 250, 2));
+    hs.push({ fl: fk, fr: fk * 1.0025, pl: frac(fk * t0), pr: frac(fk * 1.0025 * t0), w: w }); sum += w;
+  }
+  hs.forEach(function (h) { h.w /= sum; });
+  this.hs = hs; this.g = 1; this.lp = 0; this.rp = 0;
+}
+Drone.prototype.control = function (t) { this.g = 0.72 + 0.28 * Math.sin(2 * Math.PI * t / 23 + 0.5 * Math.sin(2 * Math.PI * t / 61)); };
+Drone.prototype.tick = function (out) {
+  var L = 0, R = 0, hs = this.hs;
+  for (var k = 0; k < hs.length; k++) {
+    var h = hs[k];
+    L += h.w * TAB[(h.pl * TN) | 0]; R += h.w * TAB[(h.pr * TN) | 0];
+    h.pl += h.fl / SR; if (h.pl >= 1) h.pl -= 1;
+    h.pr += h.fr / SR; if (h.pr >= 1) h.pr -= 1;
+  }
+  this.lp += (L - this.lp) * 0.2; this.rp += (R - this.rp) * 0.2;
+  out[0] = this.lp * 0.42 * this.g; out[1] = this.rp * 0.42 * this.g;
 };
 
 function Bowls(st, t0, total) {
-  var mood = MOODS[st.mood] || MOODS.calm, base = st.tuning / 4, rnd = mkRng(777 + (st.seed || 0));
+  var mood = moodOf(st), base = st.tuning / 4, rnd = mkRng(777 + (st.seed || 0) * 131);
   var every = st.bowlEvery || 14, list = [], t = 3 + rnd() * 4, T = total / SR;
   var ratios = [1, 2.71, 5.15, 8.4], amps = [1, 0.42, 0.2, 0.09], dec = [9, 5.5, 2.6, 1.3];
   while (t < T) {
@@ -810,6 +1136,107 @@ Bowls.prototype.tick = function (out) {
   out[0] = L * 0.24; out[1] = R * 0.24;
 };
 
+/* ---------- мелодия и колокольчики: ноты берутся из текущего аккорда ---------- */
+var INST = {
+  harp:    { p: [1, 2, 3, 4],        a: [1, 0.45, 0.22, 0.1],        d: [2.6, 1.5, 0.9, 0.5],       att: 0.004, g: 1 },
+  kalimba: { p: [1, 5.4, 9.1],       a: [1, 0.22, 0.07],             d: [1.7, 0.22, 0.1],           att: 0.002, g: 1.1 },
+  piano:   { p: [1, 2, 3, 4, 6],     a: [1, 0.38, 0.16, 0.08, 0.04], d: [3.2, 1.7, 1, 0.6, 0.35],   att: 0.006, g: 0.95 },
+  bells:   { p: [1, 2.76, 5.4, 8.93],a: [1, 0.45, 0.25, 0.12],       d: [4.5, 2.6, 1.4, 0.7],       att: 0.002, g: 0.8 },
+  flute:   { p: [1, 2, 3],           a: [1, 0.28, 0.09],             sus: true, att: 0.22, rel: 0.7, g: 1.1 }
+};
+function noteEvents(st, total, kind) {
+  var mood = moodOf(st), base = st.tuning / 4, rnd = mkRng(1234 + (st.seed || 0) * 97 + (kind === 'chimes' ? 555 : 0));
+  var dur = chordDur(st), n = mood.chords.length, T = total / SR, list = [];
+  function pool(t, lo, hi) {
+    var ch = mood.chords[Math.floor(t / dur) % n], out = [];
+    ch.forEach(function (x) { for (var o = 0; o <= 36; o += 12) { var f = base * Math.pow(2, (x + o) / 12); if (f >= lo && f <= hi && out.indexOf(f) < 0) out.push(f); } });
+    return out.sort(function (a, b) { return a - b; });
+  }
+  var t, P, j;
+  if (kind === 'chimes') {
+    t = 5 + rnd() * 6;
+    while (t < T) {
+      var cnt = 3 + Math.floor(rnd() * 5), tt = t;
+      for (j = 0; j < cnt; j++) {
+        P = pool(tt, 700, 2600);
+        if (P.length) list.push({ t: tt, f: P[Math.floor(rnd() * P.length)], pan: 0.15 + rnd() * 0.7, vel: 0.3 + rnd() * 0.5 });
+        tt += 0.1 + rnd() * 0.5;
+      }
+      t += 12 + rnd() * 22;
+    }
+    return list;
+  }
+  var inst = st.melInst || 'harp', sus = inst === 'flute', every = st.melEvery || 10, idx = -1;
+  var lo = sus ? 260 : 220, hi = sus ? 880 : 1000;
+  t = 4 + rnd() * 4;
+  while (t < T) {
+    P = pool(t, lo, hi); if (!P.length) { t += every; continue; }
+    var len = 2 + Math.floor(rnd() * (sus ? 2 : 4));
+    if (idx < 0 || idx >= P.length) idx = Math.floor(rnd() * P.length);
+    for (j = 0; j < len && t < T; j++) {
+      P = pool(t, lo, hi);
+      var r = rnd(), step = r < 0.35 ? -1 : r < 0.7 ? 1 : r < 0.85 ? -2 : 2;
+      idx = Math.max(0, Math.min(P.length - 1, idx + (j ? step : 0)));
+      var nd = sus ? 1.1 + rnd() * 1.3 : 0.35 + rnd() * 0.75;
+      list.push({ t: t, f: P[idx], pan: 0.35 + rnd() * 0.3, vel: 0.55 + rnd() * 0.4, len: sus ? nd * 0.9 : 0 });
+      t += nd;
+    }
+    t += every * (0.6 + 0.8 * rnd());
+  }
+  return list;
+}
+function Notes(list, inst, t0, seed) {
+  this.list = list; this.I = INST[inst] || INST.harp; this.idx = 0; this.active = []; this.r = mkRng(seed || 99);
+  var I = this.I, life = I.sus ? 0 : I.d[0] * 6;
+  for (var i = 0; i < list.length; i++) {
+    var s = list[i];
+    if (s.t > t0) { this.idx = i; break; }
+    this.idx = i + 1;
+    if (t0 - s.t < (I.sus ? s.len + I.rel : life)) this.start(s, t0);
+  }
+}
+Notes.prototype.start = function (s, t) {
+  var I = this.I, el = t - s.t;
+  s.parts = I.p.map(function (r, k) { return { f: s.f * r, a: I.a[k] * s.vel, d: I.d ? I.d[k] : 0, ph: frac(s.f * r * el), inc: s.f * r / SR, g: 0 }; });
+  s.env = 0; this.active.push(s);
+};
+Notes.prototype.control = function (t) {
+  while (this.idx < this.list.length && this.list[this.idx].t <= t) { this.start(this.list[this.idx], t); this.idx++; }
+  var I = this.I, act = [];
+  for (var i = 0; i < this.active.length; i++) {
+    var s = this.active[i], el = t - s.t, k;
+    if (I.sus) {
+      if (el > s.len + I.rel) continue;
+      var e = el < I.att ? el / I.att : 1;
+      if (el > s.len) e *= Math.max(0, 1 - (el - s.len) / I.rel);
+      var vib = el > 0.4 ? 1 + 0.0045 * Math.sin(2 * Math.PI * 5.2 * el) * Math.min(1, (el - 0.4) / 0.4) : 1;
+      s.env = e;
+      for (k = 0; k < s.parts.length; k++) { var p = s.parts[k]; p.g = p.a * e; p.inc = p.f * vib / SR; }
+    } else {
+      if (el > I.d[0] * 6) continue;
+      var at = Math.min(1, el / I.att);
+      for (k = 0; k < s.parts.length; k++) s.parts[k].g = s.parts[k].a * at * Math.exp(-el / s.parts[k].d);
+    }
+    act.push(s);
+  }
+  this.active = act;
+};
+Notes.prototype.tick = function (out) {
+  var L = 0, R = 0, sus = this.I.sus;
+  for (var i = 0; i < this.active.length; i++) {
+    var s = this.active[i], v = 0;
+    for (var k = 0; k < s.parts.length; k++) {
+      var p = s.parts[k];
+      v += p.g * TAB[(p.ph * TN) | 0];
+      p.ph += p.inc; if (p.ph >= 1) p.ph -= 1;
+    }
+    if (sus) v += (this.r() * 2 - 1) * 0.018 * s.env * s.vel; // дыхание флейты
+    L += v * (1 - s.pan); R += v * s.pan;
+  }
+  out[0] = L * 0.2 * this.I.g; out[1] = R * 0.2 * this.I.g;
+};
+
+/* ---------- природа ---------- */
 function Ocean(seed) { this.r = mkRng(seed); this.l1 = 0; this.r1 = 0; this.l2 = 0; this.r2 = 0; this.cL = 0.05; this.cR = 0.05; this.gL = 0; this.gR = 0; }
 Ocean.prototype.control = function (t) {
   function wave(t, ph) {
@@ -839,17 +1266,186 @@ Rain.prototype.tick = function (out) {
   out[1] = (this.lr * 0.3 + d * 0.15 * this.dL) * this.g;
 };
 
-function Binaural(st, t0) {
-  var beats = { alpha: 10, theta: 6, delta: 2.5 };
-  this.fl = st.binCarrier || 200; this.fr = this.fl + (beats[st.binType] || 6);
-  this.pl = frac(this.fl * t0); this.pr = frac(this.fr * t0);
-}
-Binaural.prototype.tick = function (out) {
-  out[0] = TAB[(this.pl * TN) | 0] * 0.07; out[1] = TAB[(this.pr * TN) | 0] * 0.07;
-  this.pl += this.fl / SR; if (this.pl >= 1) this.pl -= 1;
-  this.pr += this.fr / SR; if (this.pr >= 1) this.pr -= 1;
+/* полосовой фильтр (Чемберлен) */
+function SVF() { this.lo = 0; this.bp = 0; }
+SVF.prototype.p = function (x, F, q) { this.lo += F * this.bp; var hi = x - this.lo - q * this.bp; this.bp += F * hi; return this.bp; };
+
+function Wind(seed) { this.r = mkRng(seed); this.fl = new SVF(); this.fr = new SVF(); this.Fl = 0.05; this.Fr = 0.05; this.gl = 0; this.gr = 0; }
+Wind.prototype.control = function (t) {
+  function c(t, ph) { return 0.5 + 0.5 * Math.sin(2 * Math.PI * t / 13 + ph + 0.8 * Math.sin(2 * Math.PI * t / 37 + ph)); }
+  function g(t, ph) { return 0.2 + 0.8 * Math.pow(0.5 + 0.5 * Math.sin(2 * Math.PI * t / 9.7 + ph + Math.sin(2 * Math.PI * t / 29 + ph)), 2); }
+  this.Fl = 2 * Math.sin(Math.PI * (220 + 600 * c(t, 0)) / SR); this.Fr = 2 * Math.sin(Math.PI * (220 + 600 * c(t, 1.3)) / SR);
+  this.gl = g(t, 0); this.gr = g(t, 0.7);
+};
+Wind.prototype.tick = function (out) {
+  out[0] = this.fl.p(this.r() * 2 - 1, this.Fl, 0.35) * this.gl * 0.55;
+  out[1] = this.fr.p(this.r() * 2 - 1, this.Fr, 0.35) * this.gr * 0.55;
 };
 
+function Stream(seed) {
+  this.r = mkRng(seed); this.f1 = new SVF(); this.f2 = new SVF(); this.f3 = new SVF(); this.f4 = new SVF();
+  this.a1 = 0.5; this.a2 = 0.5; this.a3 = 0.5; this.a4 = 0.5; this.bub = [];
+}
+Stream.prototype.control = function () {
+  var r = this.r;
+  function walk(a) { a += (r() - 0.5) * 0.35; return a < 0.15 ? 0.15 : a > 1 ? 1 : a; }
+  this.a1 = walk(this.a1); this.a2 = walk(this.a2); this.a3 = walk(this.a3); this.a4 = walk(this.a4);
+  if (r() < 0.012) this.bub.push({ f: 350 + r() * 650, ph: 0, a: 0.25 + r() * 0.5, pan: r() });
+};
+Stream.prototype.tick = function (out) {
+  var r = this.r, F1 = 0.17, F2 = 0.36;
+  var L = this.f1.p(r() * 2 - 1, F1, 0.28) * this.a1 + this.f2.p(r() * 2 - 1, F2, 0.3) * this.a2 * 0.7;
+  var R = this.f3.p(r() * 2 - 1, F1 * 1.08, 0.28) * this.a3 + this.f4.p(r() * 2 - 1, F2 * 0.93, 0.3) * this.a4 * 0.7;
+  if (this.bub.length) {
+    var keep = [];
+    for (var i = 0; i < this.bub.length; i++) {
+      var b = this.bub[i], v = TAB[(b.ph * TN) | 0] * b.a;
+      b.ph += b.f / SR; if (b.ph >= 1) b.ph -= 1; b.f *= 1.00008; b.a *= 0.9985;
+      L += v * (1 - b.pan); R += v * b.pan;
+      if (b.a > 0.01) keep.push(b);
+    }
+    this.bub = keep;
+  }
+  out[0] = L * 0.22; out[1] = R * 0.22;
+};
+
+/* птицы: свисты, трели, короткие щебетания, изредка мягкое воркование */
+function Birds(st, t0, total) {
+  var rnd = mkRng(4242 + (st.seed || 0) * 71), T = total / SR, list = [], t = 1.5 + rnd() * 3;
+  while (t < T) {
+    var type = rnd(), pan = 0.1 + rnd() * 0.8, vel = 0.35 + rnd() * 0.65, tt = t, k, n;
+    if (type < 0.4) {               // свист
+      var f = 2200 + rnd() * 1100, up = rnd() < 0.5 ? 1.25 : 0.8; n = 2 + Math.floor(rnd() * 3);
+      for (k = 0; k < n; k++) { var l = 0.12 + rnd() * 0.1; list.push({ t: tt, len: l, f0: f, f1: f * up, pan: pan, vel: vel }); tt += l + 0.06 + rnd() * 0.08; }
+    } else if (type < 0.7) {        // трель
+      var f2 = 3800 + rnd() * 1200; n = 6 + Math.floor(rnd() * 8);
+      for (k = 0; k < n; k++) { list.push({ t: tt, len: 0.035, f0: f2, f1: f2 * 0.92, pan: pan, vel: vel * 0.7 }); tt += 0.06; f2 *= 0.99; }
+    } else if (type < 0.94) {       // щебет
+      n = 1 + Math.floor(rnd() * 3);
+      for (k = 0; k < n; k++) { var f3 = 4200 + rnd() * 900; list.push({ t: tt, len: 0.07, f0: f3, f1: f3 * 0.55, pan: pan, vel: vel * 0.8 }); tt += 0.12 + rnd() * 0.1; }
+    } else {                        // воркование вдали
+      var f4 = 480 + rnd() * 80;
+      for (k = 0; k < 3; k++) { list.push({ t: tt, len: k === 1 ? 0.45 : 0.25, f0: f4 * (k === 1 ? 1.06 : 1), f1: f4 * 0.97, pan: pan, vel: vel * 0.9, low: 1 }); tt += 0.55; }
+    }
+    t = tt + 1.2 + rnd() * 5.5;
+  }
+  this.list = list; this.idx = 0; this.active = [];
+  while (this.idx < list.length && list[this.idx].t < t0) this.idx++;
+  this.t = t0;
+}
+Birds.prototype.control = function (t) { this.t = t; while (this.idx < this.list.length && this.list[this.idx].t <= t) { var s = this.list[this.idx++]; s.ph = 0; s.x = (t - s.t) / s.len; this.active.push(s); } };
+Birds.prototype.tick = function (out) {
+  var L = 0, R = 0, keep = [];
+  for (var i = 0; i < this.active.length; i++) {
+    var s = this.active[i];
+    if (s.x >= 1) continue;
+    var f = s.f0 + (s.f1 - s.f0) * s.x, e = Math.sin(Math.PI * s.x), v = TAB[(s.ph * TN) | 0] * e * e * s.vel;
+    if (s.low) v *= 1.6;
+    s.ph += f / SR; if (s.ph >= 1) s.ph -= 1; s.x += 1 / (s.len * SR);
+    L += v * (1 - s.pan); R += v * s.pan; keep.push(s);
+  }
+  this.active = keep;
+  out[0] = L * 0.32; out[1] = R * 0.32;
+};
+
+/* сверчки: короткие серии импульсов на высокой частоте */
+function Crickets(t0) {
+  this.c = [{ f: 4350, pan: 0.25, P: 0.93, o: 0.1, ph: 0 }, { f: 4720, pan: 0.78, P: 1.07, o: 0.47, ph: 0 }, { f: 4050, pan: 0.5, P: 1.31, o: 0.8, ph: 0, far: 0.45 }];
+  this.t = t0; this.sw = 1;
+}
+Crickets.prototype.control = function (t) { this.t = t; this.sw = 0.75 + 0.25 * Math.sin(2 * Math.PI * t / 41); };
+Crickets.prototype.tick = function (out) {
+  var L = 0, R = 0, t = this.t;
+  for (var i = 0; i < this.c.length; i++) {
+    var c = this.c[i], tc = t + c.o, nchirp = Math.floor(tc / c.P), loc = tc - nchirp * c.P, e = 0;
+    var h = frac(Math.sin(nchirp * 12.9898 + i * 78.233) * 43758.5453);
+    if (h > 0.18) { var pi = Math.floor(loc / 0.034); if (pi < 3) { var x = (loc - pi * 0.034) / 0.02; if (x < 1) { e = Math.sin(Math.PI * x); e *= e; } } }
+    var v = TAB[(c.ph * TN) | 0] * e * (c.far || 1);
+    c.ph += c.f / SR; if (c.ph >= 1) c.ph -= 1;
+    L += v * (1 - c.pan); R += v * c.pan;
+  }
+  this.t += 1 / SR;
+  out[0] = L * 0.3 * this.sw; out[1] = R * 0.3 * this.sw;
+};
+
+/* костёр: тёплый гул + потрескивания */
+function Fire(seed) { this.r = mkRng(seed); this.l = 0; this.rr = 0; this.cr = []; this.g = 1; this.pl = 0; this.pr = 0; }
+Fire.prototype.control = function (t) {
+  this.g = 0.75 + 0.25 * Math.sin(2 * Math.PI * t / 7 + Math.sin(2 * Math.PI * t / 3.1));
+  var r = this.r;
+  if (r() < 0.018) this.cr.push({ a: (r() < 0.12 ? 0.9 : 0.25) + r() * 0.35, d: 0.93 + r() * 0.05, pan: r() });
+};
+Fire.prototype.tick = function (out) {
+  var r = this.r, a = r() * 2 - 1, b = r() * 2 - 1;
+  this.l += (a - this.l) * 0.012; this.rr += (b - this.rr) * 0.012;
+  var L = this.l * 2.6 * this.g, R = this.rr * 2.6 * this.g;
+  if (this.cr.length) {
+    var keep = [], n = r() * 2 - 1, hp = n - this.pl; this.pl = n;
+    for (var i = 0; i < this.cr.length; i++) {
+      var c = this.cr[i], v = hp * c.a;
+      L += v * (1 - c.pan); R += v * c.pan; c.a *= c.d;
+      if (c.a > 0.004) keep.push(c);
+    }
+    this.cr = keep;
+  }
+  out[0] = L * 0.3; out[1] = R * 0.3;
+};
+
+/* мягкий «коричневый» шум — ровный, глухой, как шум далёкого водопада */
+function Brown(seed) { this.r = mkRng(seed); this.l = 0; this.rr = 0; }
+Brown.prototype.tick = function (out) {
+  this.l = (this.l + 0.02 * (this.r() * 2 - 1)) / 1.02; this.rr = (this.rr + 0.02 * (this.r() * 2 - 1)) / 1.02;
+  out[0] = this.l * 1.15; out[1] = this.rr * 1.15;
+};
+
+/* сердцебиение: «тук-тук» в спокойном ритме */
+function Heart(st, t0) { this.P = 60 / (st.hbBpm || 60); this.t = t0; this.lp = 0; }
+Heart.prototype.control = function (t) { this.t = t; };
+Heart.prototype.tick = function (out) {
+  var tc = this.t % this.P, v = 0, x;
+  if (tc < 0.3) { x = tc; v += Math.sin(2 * Math.PI * 52 * x) * Math.exp(-x / 0.06) * Math.min(1, x / 0.008); v += 0.35 * Math.sin(2 * Math.PI * 104 * x) * Math.exp(-x / 0.04) * Math.min(1, x / 0.008); }
+  if (tc > 0.27 && tc < 0.6) { x = tc - 0.27; v += 0.7 * (Math.sin(2 * Math.PI * 64 * x) + 0.35 * Math.sin(2 * Math.PI * 128 * x)) * Math.exp(-x / 0.045) * Math.min(1, x / 0.008); }
+  this.lp += (v - this.lp) * 0.3; this.t += 1 / SR;
+  out[0] = this.lp * 0.5; out[1] = this.lp * 0.5;
+};
+
+/* тон выбранной частоты (528 Гц и др.) — чистый мягкий тон с медленной «волной» */
+function Tone(st, t0) { this.f = st.toneHz || 528; this.p = frac(this.f * t0); this.q = frac(this.f * 1.0007 * t0); this.g = 1; }
+Tone.prototype.control = function (t) { this.g = 0.7 + 0.3 * Math.sin(2 * Math.PI * t / 11); };
+Tone.prototype.tick = function (out) {
+  var a = TAB[(this.p * TN) | 0], b = TAB[(this.q * TN) | 0];
+  this.p += this.f / SR; if (this.p >= 1) this.p -= 1;
+  this.q += this.f * 1.0007 / SR; if (this.q >= 1) this.q -= 1;
+  out[0] = a * 0.08 * this.g; out[1] = b * 0.08 * this.g;
+};
+
+/* ---------- ритмы мозга: бинауральные, монауральные, изохронные ----------
+   Несущая «по строю» = ля малой октавы (216 Гц при 432 / 220 при 440) — совпадает с музыкой.
+   Плавный вход: ритм начинается с альфы 10 Гц и за 5 минут опускается к выбранному. */
+var BEATS = { delta: 2.5, theta4: 4, theta: 6, schumann: 7.83, alpha8: 8, alpha: 10, smr: 12, beta: 15 };
+function Binaural(st, t0) {
+  this.fl = +st.binCarrier || st.tuning / 2; this.fb = BEATS[st.binType] || 6; this.mode = st.binMode || 'binaural';
+  this.R = (st.binRamp && this.fb < 10) ? 300 : 0; this.D = 10 - this.fb;
+  this.pl = frac(this.fl * t0); this.pr = frac(this.fl * t0 + this.beatInt(t0)); this.pb = frac(this.beatInt(t0));
+  this.cur = this.beatAt(t0); this.lp = 0;
+}
+Binaural.prototype.beatAt = function (t) { return this.R && t < this.R ? this.fb + this.D * (1 - t / this.R) : this.fb; };
+Binaural.prototype.beatInt = function (t) { var R = this.R; if (!R) return this.fb * t; return t < R ? this.fb * t + this.D * (t - t * t / (2 * R)) : this.fb * t + this.D * R / 2; };
+Binaural.prototype.control = function (t) { this.cur = this.beatAt(t); };
+Binaural.prototype.tick = function (out) {
+  var a = TAB[(this.pl * TN) | 0];
+  this.pl += this.fl / SR; if (this.pl >= 1) this.pl -= 1;
+  if (this.mode === 'iso') {
+    var e = 0.5 - 0.5 * TAB[(((this.pb + 0.25) % 1) * TN) | 0]; e = e * e;
+    this.pb += this.cur / SR; if (this.pb >= 1) this.pb -= 1;
+    this.lp += (e - this.lp) * 0.02;
+    out[0] = out[1] = a * this.lp * 0.09; return;
+  }
+  var b = TAB[(this.pr * TN) | 0];
+  this.pr += (this.fl + this.cur) / SR; if (this.pr >= 1) this.pr -= 1;
+  if (this.mode === 'mono') { out[0] = out[1] = (a + b) * 0.045; return; }
+  out[0] = a * 0.07; out[1] = b * 0.07;
+};
 /* ---------- обработка голоса ---------- */
 function Biquad(type, f, q) {
   var w = 2 * Math.PI * f / SR, c = Math.cos(w), s = Math.sin(w), al = s / (2 * q), a0;
@@ -891,16 +1487,31 @@ function* renderGen(msg) {
   var warm = Math.min(from, SR * 2), startS = from - warm, t0 = startS / SR;
   var env = voiceEnvelopes(tl, st);
 
-  var pad = st.padVol > 0 ? new Pad(st, t0) : null;
-  var bowls = st.bowlVol > 0 ? new Bowls(st, t0, total) : null;
-  var ocean = st.oceanVol > 0 ? new Ocean(11) : null;
-  var rain = st.rainVol > 0 ? new Rain(23) : null;
-  var bin = st.binVol > 0 ? new Binaural(st, t0) : null;
+  // музыкальные слои: создаются только те, у которых громкость больше нуля
+  var layers = [];
+  function add(vol, mk) { if (+vol > 0) layers.push({ o: mk(), v: +vol / 100 }); }
+  add(st.padVol, function () { return new Pad(st, t0); });
+  add(st.droneVol, function () { return new Drone(st, t0); });
+  add(st.melVol, function () { return new Notes(noteEvents(st, total, 'melody'), st.melInst || 'harp', t0, 31); });
+  add(st.bowlVol, function () { return new Bowls(st, t0, total); });
+  add(st.chimeVol, function () { return new Notes(noteEvents(st, total, 'chimes'), 'bells', t0, 37); });
+  add(st.oceanVol, function () { return new Ocean(11); });
+  add(st.rainVol, function () { return new Rain(23); });
+  add(st.windVol, function () { return new Wind(41); });
+  add(st.streamVol, function () { return new Stream(53); });
+  add(st.birdVol, function () { return new Birds(st, t0, total); });
+  add(st.cricketVol, function () { return new Crickets(t0); });
+  add(st.fireVol, function () { return new Fire(67); });
+  add(st.brownVol, function () { return new Brown(71); });
+  add(st.hbVol, function () { return new Heart(st, t0); });
+  add(st.toneVol, function () { return new Tone(st, t0); });
+  add(st.binVol, function () { return new Binaural(st, t0); });
+  var NL = layers.length;
   var cust = (CUSTOM && st.customVol > 0) ? CUSTOM : null;
   var hp = new Biquad('hp', 85, 0.707), lpv = new Biquad('lp', 14000, 0.707);
   var rev = st.reverb > 0 ? new Reverb(st.reverbSize == null ? 0.6 : st.reverbSize) : null;
 
-  var pv = st.padVol / 100, bv = st.bowlVol / 100, ov = st.oceanVol / 100, rv = st.rainVol / 100, nv = st.binVol / 100, cv = st.customVol / 100;
+  var cv = st.customVol / 100;
   var music = db2g(st.musicDb), voiceG = db2g(st.voiceDb), duckDepth = 1 - db2g(-st.duckDb);
   var wet = st.reverb / 100 * 1.1, dry = 1 - st.reverb / 100 * 0.25;
   var gateFloor = st.gate ? db2g(-22) : 1;
@@ -917,14 +1528,10 @@ function* renderGen(msg) {
     for (var s = cs; s < ce; s++) {
       if (((s - startS) & 63) === 0) {
         var t = s / SR;
-        if (pad) pad.control(t); if (bowls) bowls.control(t); if (ocean) ocean.control(t); if (rain) rain.control(t);
+        for (var li = 0; li < NL; li++) if (layers[li].o.control) layers[li].o.control(t);
       }
       var mL = 0, mR = 0;
-      if (pad) { pad.tick(tmp); mL += tmp[0] * pv; mR += tmp[1] * pv; }
-      if (bowls) { bowls.tick(tmp); mL += tmp[0] * bv; mR += tmp[1] * bv; }
-      if (ocean) { ocean.tick(tmp); mL += tmp[0] * ov; mR += tmp[1] * ov; }
-      if (rain) { rain.tick(tmp); mL += tmp[0] * rv; mR += tmp[1] * rv; }
-      if (bin) { bin.tick(tmp); mL += tmp[0] * nv; mR += tmp[1] * nv; }
+      for (var lj = 0; lj < NL; lj++) { var ly = layers[lj]; ly.o.tick(tmp); mL += tmp[0] * ly.v; mR += tmp[1] * ly.v; }
       if (cust && cN > 0) {
         var loc, kk;
         if (cP > 0) { kk = Math.floor(s / cP); loc = s - kk * cP; } else { kk = 0; loc = s % cN; }
@@ -1044,17 +1651,33 @@ if (typeof module !== 'undefined') module.exports = { render: render, VOICE: VOI
 var SR = 44100;
 var $ = function(s){ return document.querySelector(s); };
 var CATS = ['Сон','Тревога и стресс','Расслабление','Самооценка и любовь к себе','Отношения','Деньги и изобилие','Тело и психосоматика','Утро и энергия','Погружение и регрессия','Прощение и отпускание','Для детей','Индивидуальные','Другое'];
-var DEF = {qv:2,kbps:0,intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,mood:'calm',tuning:432,padVol:70,bowlVol:40,bowlEvery:16,oceanVol:0,rainVol:0,binVol:0,binType:'theta',binCarrier:200,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,fs:26};
+/* Музыкальные настройки по умолчанию: все слои выключены — шаблон включает только нужные */
+var MBASE = {mood:'calm',padTone:'warm',chordSlow:100,padVol:0,droneVol:0,melVol:0,melInst:'harp',melEvery:12,bowlVol:0,bowlEvery:16,chimeVol:0,oceanVol:0,rainVol:0,windVol:0,streamVol:0,birdVol:0,cricketVol:0,fireVol:0,brownVol:0,hbVol:0,hbBpm:60,toneVol:0,toneHz:528,binVol:0,binType:'theta',binMode:'binaural',binCarrier:0,binRamp:true};
+var MDUR = {calm:24,light:24,deep:30,space:28,heart:26,forest:26,sea:30,dream:28,night:36,ancient:32,sunrise:22,crystal:26};
 var PRESETS = [
-  ['🌙 Сон',{mood:'deep',padVol:70,bowlVol:0,oceanVol:35,rainVol:0,binVol:18,binType:'delta',outro:120,fadeOut:60,reverb:22}],
-  ['🍃 Расслабление',{mood:'calm',padVol:70,bowlVol:40,oceanVol:0,rainVol:0,binVol:0,outro:40,fadeOut:15,reverb:18}],
-  ['☀️ Утро и энергия',{mood:'light',padVol:70,bowlVol:50,bowlEvery:12,oceanVol:0,rainVol:0,binVol:15,binType:'alpha',outro:30,fadeOut:12,reverb:14}],
-  ['🌀 Погружение / регрессия',{mood:'deep',padVol:75,bowlVol:25,bowlEvery:24,oceanVol:0,rainVol:0,binVol:22,binType:'theta',outro:60,fadeOut:25,reverb:24}],
-  ['💗 Сердце, принятие',{mood:'heart',padVol:70,bowlVol:35,oceanVol:0,rainVol:0,binVol:0,outro:45,fadeOut:18,reverb:20}],
-  ['🌊 Природа',{mood:'calm',padVol:40,bowlVol:20,oceanVol:50,rainVol:20,binVol:0,outro:45,fadeOut:18,reverb:16}],
-  ['✨ Космос',{mood:'space',padVol:70,bowlVol:30,oceanVol:0,rainVol:0,binVol:15,binType:'theta',outro:45,fadeOut:20,reverb:26}]
+  {id:'sleep',name:'🌙 Сон',desc:'Бархатная «Глубина», медленная смена аккордов, тихое море и мягкий шум, дельта-ритм с плавным входом. Долгое звучание музыки после голоса.',set:{mood:'deep',padTone:'soft',chordSlow:160,padVol:65,oceanVol:22,brownVol:18,binVol:15,binType:'delta'},mix:{outro:180,fadeOut:90,reverb:22,reverbSize:0.6}},
+  {id:'night',name:'🌌 Ночной сон',desc:'«Ночь» на бархатном тембре, сверчки и мягкий шум, дельта-ритм. Для записей на всю ночь поставьте во «Сведении» «Не короче» 30–60 мин.',set:{mood:'night',padTone:'soft',chordSlow:180,padVol:60,cricketVol:12,brownVol:25,binVol:12,binType:'delta'},mix:{outro:300,fadeOut:120,reverb:22,reverbSize:0.6}},
+  {id:'relax',name:'🍃 Расслабление',desc:'«Спокойствие» на тёплом тембре, редкие фразы арфы и поющие чаши.',set:{mood:'calm',padTone:'warm',padVol:70,melVol:20,melInst:'harp',melEvery:14,bowlVol:30,bowlEvery:18},mix:{outro:40,fadeOut:15,reverb:18,reverbSize:0.6}},
+  {id:'work',name:'🛋 После работы',desc:'Мягкая «Мечта» с воздушным тембром, уютный дождь, калимба и альфа-ритм 8 Гц: выдохнуть и отпустить день.',set:{mood:'dream',padTone:'choir',padVol:60,rainVol:28,melVol:18,melInst:'kalimba',melEvery:16,binVol:10,binType:'alpha8'},mix:{outro:45,fadeOut:18,reverb:20,reverbSize:0.6}},
+  {id:'anxiety',name:'🫶 Тревога',desc:'Только ровные, предсказуемые звуки: бархатные аккорды, тихий дождь, спокойное сердцебиение 56, альфа-ритм. Без чаш, птиц и колокольчиков — ничего неожиданного.',set:{mood:'calm',padTone:'soft',chordSlow:140,padVol:65,rainVol:15,hbVol:10,hbBpm:56,binVol:10,binType:'alpha8'},mix:{outro:30,fadeOut:15,reverb:14,reverbSize:0.35}},
+  {id:'harmony',name:'⚖️ Гармония',desc:'«Мечта» с воздушным тембром, поющие чаши, редкие колокольчики и альфа-ритм.',set:{mood:'dream',padTone:'choir',padVol:65,bowlVol:25,bowlEvery:22,chimeVol:10,binVol:10,binType:'alpha8'},mix:{outro:45,fadeOut:18,reverb:20,reverbSize:0.6}},
+  {id:'heart',name:'💗 Сердце, принятие',desc:'Гармония «Сердце», электропиано, поющие чаши и тихий тон 528 Гц.',set:{mood:'heart',padTone:'warm',padVol:70,melVol:18,melInst:'piano',melEvery:14,bowlVol:25,bowlEvery:20,toneVol:5,toneHz:528},mix:{outro:45,fadeOut:18,reverb:20,reverbSize:0.6}},
+  {id:'forest',name:'🌲 Лес',desc:'Место силы в лесу: воздушная гармония «Лес», птицы, лёгкий ветер в кронах, ручей, флейта и тета-ритм.',set:{mood:'forest',padTone:'choir',padVol:50,birdVol:30,windVol:15,streamVol:15,melVol:18,melInst:'flute',melEvery:18,binVol:12,binType:'theta'},mix:{outro:45,fadeOut:18,reverb:18,reverbSize:0.6}},
+  {id:'sea',name:'🌊 Море',desc:'Место силы у моря: широкая гармония «Море», волны, морской ветер, редкие переливы арфы и тета-ритм.',set:{mood:'sea',padTone:'warm',padVol:50,oceanVol:50,windVol:10,melVol:14,melInst:'harp',melEvery:18,binVol:12,binType:'theta'},mix:{outro:45,fadeOut:20,reverb:20,reverbSize:0.6}},
+  {id:'lake',name:'🏞 Озеро',desc:'Место силы у озера: нежная «Мечта», тихое журчание у берега, лёгкий ветер, калимба и редкие птицы.',set:{mood:'dream',padTone:'warm',padVol:55,streamVol:14,windVol:10,birdVol:10,melVol:16,melInst:'kalimba',melEvery:16,binVol:12,binType:'theta'},mix:{outro:45,fadeOut:18,reverb:20,reverbSize:0.6}},
+  {id:'field',name:'🌾 Поле и солнце',desc:'Место силы в поле: светлый «Рассвет», тёплый ветер над травой, птицы, флейта и колокольчики.',set:{mood:'sunrise',padTone:'warm',padVol:55,windVol:28,birdVol:15,melVol:15,melInst:'flute',melEvery:16,chimeVol:8,binVol:10,binType:'alpha8'},mix:{outro:40,fadeOut:18,reverb:16,reverbSize:0.6}},
+  {id:'morning',name:'☀️ Доброе утро',desc:'«Рассвет» со стеклянным тембром, электропиано, птицы и колокольчики, ритм 12 Гц: бодро, но мягко.',set:{mood:'sunrise',padTone:'glass',chordSlow:80,padVol:60,melVol:25,melInst:'piano',melEvery:8,birdVol:18,chimeVol:12,binVol:10,binType:'smr',binRamp:false},mix:{outro:25,fadeOut:10,reverb:14,reverbSize:0.35}},
+  {id:'rod',name:'🌳 Сила рода',desc:'«Древность» на органе, низкий бурдон «Ом», спокойное сердцебиение, редкие чаши и ритм 7,83 Гц. Голос — в объёмном пространстве «храм».',set:{mood:'ancient',padTone:'organ',chordSlow:130,padVol:55,droneVol:40,hbVol:15,hbBpm:56,bowlVol:20,bowlEvery:26,binVol:13,binType:'schumann'},mix:{outro:60,fadeOut:25,reverb:24,reverbSize:0.85}},
+  {id:'fire',name:'🔥 У костра',desc:'«Древность», потрескивание костра, сверчки, флейта и тихий бурдон: очаг, сказка, вечер.',set:{mood:'ancient',padTone:'warm',padVol:45,fireVol:40,cricketVol:10,droneVol:15,melVol:14,melInst:'flute',melEvery:20},mix:{outro:45,fadeOut:20,reverb:16,reverbSize:0.35}},
+  {id:'regress',name:'🌀 Погружение / регрессия',desc:'«Глубина», бурдон, сердцебиение, редкие чаши и тета-ритм 4 Гц с плавным входом.',set:{mood:'deep',padTone:'warm',chordSlow:140,padVol:70,droneVol:30,hbVol:12,hbBpm:58,bowlVol:20,bowlEvery:26,binVol:18,binType:'theta4'},mix:{outro:60,fadeOut:25,reverb:24,reverbSize:0.85}},
+  {id:'body',name:'🫀 Диалог с телом',desc:'Бархатное «Спокойствие», редкие чаши для смены фокуса, тихое сердцебиение и тета 6 Гц. Мало звуков — много внимания к ощущениям.',set:{mood:'calm',padTone:'soft',chordSlow:130,padVol:60,bowlVol:20,bowlEvery:24,hbVol:8,hbBpm:58,binVol:12,binType:'theta'},mix:{outro:40,fadeOut:18,reverb:18,reverbSize:0.6}},
+  {id:'release',name:'🍂 Отпустить',desc:'«Спокойствие» с воздушным тембром, ветер, который «уносит», арфа и тон 396 Гц (отпускание).',set:{mood:'calm',padTone:'choir',padVol:60,windVol:18,melVol:15,melInst:'harp',melEvery:16,toneVol:4,toneHz:396,binVol:10,binType:'alpha8'},mix:{outro:45,fadeOut:18,reverb:20,reverbSize:0.6}},
+  {id:'grat',name:'🙏 Благодарность',desc:'«Кристалл» со стеклянным тембром, поющие чаши, колокольчики и тон 528 Гц.',set:{mood:'crystal',padTone:'glass',padVol:60,bowlVol:28,bowlEvery:20,chimeVol:12,toneVol:5,toneHz:528},mix:{outro:40,fadeOut:18,reverb:22,reverbSize:0.6}},
+  {id:'space',name:'✨ Космос',desc:'«Космос» на стеклянном тембре, поющие чаши, колокольчики и тета-ритм.',set:{mood:'space',padTone:'glass',padVol:65,bowlVol:28,chimeVol:10,binVol:14,binType:'theta'},mix:{outro:45,fadeOut:20,reverb:26,reverbSize:0.85}}
 ];
-
+function presetById(id){ for(var i=0;i<PRESETS.length;i++) if(PRESETS[i].id===id) return PRESETS[i]; return null; }
+var DEF = Object.assign({qv:2,kbps:0,intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,tuning:432,seed:0,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,fs:26},
+  MBASE, presetById('relax').set, {preset:'relax'});
 var S = Object.assign({}, DEF);
 var segs = [];          // {id,name,pause,blob,dur}
 var script = '';
@@ -1330,22 +1953,90 @@ $('#segList').addEventListener('input',function(e){
 });
 
 /* ---------- настройки (ползунки) ---------- */
+var pct=function(v){return v?v+'%':'выкл';};
 var SL = {
-  padVol:function(v){return v+'%';}, bowlVol:function(v){return v+'%';}, oceanVol:function(v){return v+'%';}, rainVol:function(v){return v+'%';}, binVol:function(v){return v+'%';}, customVol:function(v){return v+'%';},
+  padVol:pct, droneVol:pct, melVol:pct, bowlVol:pct, chimeVol:pct, oceanVol:pct, rainVol:pct, windVol:pct, streamVol:pct, birdVol:pct,
+  cricketVol:pct, fireVol:pct, brownVol:pct, hbVol:pct, toneVol:pct, binVol:pct, customVol:function(v){return v+'%';},
+  chordSlow:function(v){ return Math.round((MDUR[S.mood]||24)*v/100)+' с'; }, seed:function(v){ return '№ '+(v+1); },
+  melEvery:function(v){return v+' с';}, hbBpm:function(v){return v+'/мин';},
   bowlEvery:function(v){return v+' с';}, intro:function(v){return v+' с';}, outro:function(v){return v>=60?fmt(v):v+' с';}, minTotal:function(v){return v?v+' мин':'—';},
   fadeIn:function(v){return v+' с';}, fadeOut:function(v){return v+' с';}, voiceDb:function(v){return (v>0?'+':'')+v+' дБ';}, musicDb:function(v){return v+' дБ';},
-  duckDb:function(v){return v?'−'+v+' дБ':'нет';}, reverb:function(v){return v+'%';}
+  duckDb:function(v){return v?'−'+v+' дБ':'нет';}, reverb:function(v){return v+'%';}, reverbSize:function(v){ return v<0.35?'комната':v<0.7?'зал':'храм'; }
 };
+var SELS = ['mood','padTone','tuning','melInst','binType','binMode','binCarrier','toneHz','kbps'], NUMSEL = {tuning:1,kbps:1,binCarrier:1,toneHz:1};
+var CHKS = ['comp','gate','trim','noiseSup','binRamp'];
+function refreshLabels(){ Object.keys(SL).forEach(function(k){ var vv=$('#'+k+'V'); if(vv) vv.textContent=SL[k](+S[k]); }); }
 function bindSettings(){
   Object.keys(SL).forEach(function(k){
-    var el=$('#'+k), vv=$('#'+k+'V'); el.value=S[k]; vv.textContent=SL[k](+S[k]);
-    el.oninput=function(){ S[k]=+el.value; vv.textContent=SL[k](S[k]); if(['intro','outro','minTotal'].indexOf(k)>=0) updateInfo(); saveDraft(); };
+    var el=$('#'+k); if(!el) return; el.value=S[k];
+    el.oninput=function(){ S[k]=+el.value; refreshLabels(); if(['intro','outro','minTotal'].indexOf(k)>=0) updateInfo(); changed(); };
   });
-  ['mood','tuning','binType','kbps'].forEach(function(k){ var el=$('#'+k); el.value=String(S[k]); el.onchange=function(){ S[k]=(k==='tuning'||k==='kbps')?+el.value:el.value; saveDraft(); }; });
-  ['comp','gate','trim','noiseSup'].forEach(function(k){ var el=$('#'+k); el.checked=!!S[k]; el.onchange=function(){ S[k]=el.checked; saveDraft(); }; });
+  SELS.forEach(function(k){ var el=$('#'+k); el.value=String(S[k]); el.onchange=function(){ S[k]=NUMSEL[k]?+el.value:el.value; refreshLabels(); changed(); }; });
+  CHKS.forEach(function(k){ var el=$('#'+k); el.checked=!!S[k]; el.onchange=function(){ S[k]=el.checked; changed(); }; });
+  refreshLabels(); renderPresets(); renderNow();
 }
-$('#presets').innerHTML=PRESETS.map(function(p,i){ return '<button data-i="'+i+'">'+p[0]+'</button>'; }).join('');
-$('#presets').onclick=function(e){ var b=e.target.closest('button'); if(!b) return; Object.assign(S,PRESETS[+b.dataset.i][1]); bindSettings(); updateInfo(); saveDraft(); toast('Шаблон «'+PRESETS[+b.dataset.i][0].replace(/^\S+\s/,'')+'» применён'); };
+function changed(){ renderPresets(); renderNow(); saveDraft(); }
+
+/* ---------- шаблоны и «Сейчас звучит» ---------- */
+function presetState(){
+  var p=presetById(S.preset); if(!p) return {p:null,mod:false};
+  var m=Object.assign({},MBASE,p.set);
+  var mod=Object.keys(MBASE).some(function(k){ return String(S[k])!==String(m[k]); });
+  return {p:p,mod:mod};
+}
+function renderPresets(){
+  var st=presetState();
+  $('#presets').innerHTML=PRESETS.map(function(p){
+    var on=st.p&&st.p.id===p.id;
+    return '<button data-id="'+p.id+'" class="'+(on?'on'+(st.mod?' mod':''):'')+'" title="'+esc(p.desc)+'">'+(on&&!st.mod?'✓ ':'')+p.name+(on&&st.mod?' <span class="mk">· изменён</span>':'')+'</button>';
+  }).join('');
+}
+function optName(id){ var el=$('#'+id); var o=el&&el.options[el.selectedIndex]; return o?o.text.split(' — ')[0]:''; }
+var LAYERS = [
+  ['padVol',function(){return 'Аккорды';}],['droneVol',function(){return 'Бурдон «Ом»';}],
+  ['melVol',function(){return 'Мелодия: '+optName('melInst').toLowerCase();}],['bowlVol',function(){return 'Поющие чаши';}],['chimeVol',function(){return 'Колокольчики';}],
+  ['oceanVol',function(){return 'Море';}],['rainVol',function(){return 'Дождь';}],['windVol',function(){return 'Ветер';}],['streamVol',function(){return 'Ручей';}],
+  ['birdVol',function(){return 'Птицы';}],['cricketVol',function(){return 'Сверчки';}],['fireVol',function(){return 'Костёр';}],['brownVol',function(){return 'Мягкий шум';}],
+  ['hbVol',function(){return 'Сердцебиение '+S.hbBpm+'/мин';}],['toneVol',function(){return 'Тон '+S.toneHz+' Гц';}],
+  ['binVol',function(){return optName('binType')+', '+optName('binMode').toLowerCase()+(S.binRamp&&['alpha','smr','beta'].indexOf(S.binType)<0?', плавный вход':'');}]
+];
+function nowHtml(short){
+  var st=presetState(), head;
+  if(st.p) head='Шаблон <b>«'+esc(st.p.name.replace(/^\S+\s/,''))+'»</b>'+(st.mod?' <span class="pill">изменён вами</span>':' <span class="pill">как в шаблоне</span>');
+  else head='<b>Свои настройки</b> <span class="small muted">(шаблон не выбран)</span>';
+  var on=LAYERS.filter(function(l){ return +S[l[0]]>0; }).map(function(l){ return '<span class="pill">'+esc(l[1]())+' · '+S[l[0]]+'%</span>'; });
+  if(customBlob&&S.customVol>0) on.push('<span class="pill">Своя дорожка · '+S.customVol+'%</span>');
+  if(!on.length) on.push('<span class="pill off">все слои выключены — будет тишина</span>');
+  var h='<div>Сейчас звучит: '+head+'</div>';
+  h+='<div class="small" style="margin-top:4px">Гармония <b>'+esc(optName('mood'))+'</b> · тембр '+esc(optName('padTone').toLowerCase())+' · строй '+S.tuning+' Гц · вариант № '+(S.seed+1)+'</div>';
+  if(st.p&&!short) h+='<div class="small muted" style="margin-top:4px">'+esc(st.p.desc)+'</div>';
+  h+='<div class="chips2">'+on.join('')+'</div>';
+  if(short) h+='<div style="margin-top:8px"><button class="mini" data-goto="music">Изменить музыку →</button></div>';
+  if(!short&&st.mod) h+='<div class="small muted" style="margin-top:6px">Чтобы вернуть исходный звук шаблона, нажмите его ещё раз.</div>';
+  return h;
+}
+function renderNow(){ $('#nowBox').innerHTML=nowHtml(false); $('#nowBox2').innerHTML=nowHtml(true); }
+$('#nowBox2').onclick=function(e){ var b=e.target.closest('[data-goto]'); if(b) document.querySelector('[data-tab='+b.dataset.goto+']').click(); };
+$('#presets').onclick=function(e){
+  var b=e.target.closest('button'); if(!b) return; var p=presetById(b.dataset.id); if(!p) return;
+  Object.assign(S,MBASE,p.set,p.mix); S.preset=p.id; bindSettings(); updateInfo(); saveDraft();
+  toast('Шаблон «'+p.name.replace(/^\S+\s/,'')+'» включён. Во «Сведении» тоже настроены завершение и объём');
+};
+$('#randomMix').onclick=function(){
+  var R=function(a){return a[Math.floor(Math.random()*a.length)];}, n=function(a,b){return Math.round(a+Math.random()*(b-a));};
+  var shuffle=function(a){ return a.map(function(x){return [Math.random(),x];}).sort(function(x,y){return x[0]-y[0];}).map(function(x){return x[1];}); };
+  var s=Object.assign({},MBASE,{mood:R(Object.keys(MDUR)),padTone:R(['warm','soft','choir','organ','glass']),padVol:n(50,70),chordSlow:R([80,100,120,150])});
+  shuffle(['mel','bowl','chime','drone']).slice(0,n(1,2)).forEach(function(k){
+    if(k==='mel'){ s.melVol=n(14,26); s.melInst=R(['harp','kalimba','piano','flute']); s.melEvery=n(8,18); }
+    if(k==='bowl'){ s.bowlVol=n(18,32); s.bowlEvery=n(14,26); }
+    if(k==='chime') s.chimeVol=n(8,14);
+    if(k==='drone') s.droneVol=n(15,35);
+  });
+  shuffle([['oceanVol',20,45],['rainVol',15,30],['windVol',10,25],['streamVol',10,20],['birdVol',10,25],['cricketVol',8,15],['fireVol',20,35],['brownVol',10,20]]).slice(0,n(0,2)).forEach(function(x){ s[x[0]]=n(x[1],x[2]); });
+  if(Math.random()<0.5){ s.binVol=n(10,15); s.binType=R(['alpha8','alpha','theta','delta']); }
+  Object.assign(S,s); S.seed=n(0,29); S.preset=null; bindSettings(); saveDraft();
+  toast('Новое сочетание — нажмите «▶ Послушать музыку»');
+};
 
 /* ---------- таймлайн и итог ---------- */
 function totals(){
@@ -1383,7 +2074,7 @@ var SILENT=URL.createObjectURL(wavBlob(new Float32Array(2205),new Float32Array(2
 function unlockAudio(){ // вызывается прямо в нажатии: после этого iPhone разрешит включить звук, когда он будет готов
   try{ if(!pAudio.src||pAudio.src===SILENT){ pAudio.src=SILENT; var p=pAudio.play(); if(p&&p.catch) p.catch(function(){}); } }catch(e){}
 }
-var BTN_TXT={musicPrev:'▶ Послушать музыку 30 с'};
+var BTN_TXT={musicPrev:'▶ Послушать музыку 40 с'};
 function stopPlay(){
   if(pAudio.src!==SILENT){
     try{ pAudio.pause(); }catch(e){}
@@ -1471,16 +2162,16 @@ function streamTick(){
 $('#prevBtn').onclick=function(){ if(ST){ streamStop(); return; } if(!segs.length) toast('Голоса пока нет — прозвучит только музыка'); streamPlay(prevAt); };
 $('#prevStop').onclick=function(){ streamStop(); };
 $('#musicStop').onclick=stopPlay;
-$('#musicPrev').onclick=function(){ if(playBtn===this){ stopPlay(); return; } preview({noVoice:true,from:0,len:30,st:{minTotal:1,intro:0,fadeIn:3,fadeOut:3,outro:30}},'#musicStop',$('#musicStatus'),$('#musicPrev')); };
+$('#musicPrev').onclick=function(){ if(playBtn===this){ stopPlay(); return; } preview({noVoice:true,from:0,len:40,st:{minTotal:1,intro:0,fadeIn:3,fadeOut:3,outro:40}},'#musicStop',$('#musicStatus'),$('#musicPrev')); };
 
 /* ---------- экспорт ---------- */
 // Голос записан в моно, а мягкая музыка почти не теряет от моно — поэтому для медитаций без бинауральных
 // ритмов и без своей стерео-дорожки моно 96 кбит/с звучит так же, как стерео 160, а весит в 1,7 раза меньше.
 // Бинауральные ритмы работают только в стерео — тогда выбирается стерео 128 кбит/с.
 function mp3Mode(){
-  var k=+S.kbps||0, needStereo=S.binVol>0||(customBlob&&S.customVol>0);
+  var binSt=S.binVol>0&&(S.binMode||'binaural')==='binaural', k=+S.kbps||0, needStereo=binSt||(customBlob&&S.customVol>0);
   if(k===0) return needStereo?{kbps:128,mono:false,label:'стерео 128 кбит/с — нужны бинауральные ритмы или своя стерео-дорожка'}:{kbps:96,mono:true,label:'моно 96 кбит/с'};
-  if(k===96&&S.binVol>0) return {kbps:128,mono:false,label:'стерео 128 кбит/с: бинауральные ритмы не работают в моно'};
+  if(k===96&&binSt) return {kbps:128,mono:false,label:'стерео 128 кбит/с: бинауральные ритмы не работают в моно'};
   return {kbps:k,mono:k===96,label:(k===96?'моно ':'стерео ')+k+' кбит/с'};
 }
 function kbpsHint(){ var q=mp3Mode(), T=totals().total; $('#kbpsHint').textContent='Будет: '+q.label+' · примерно '+(T*q.kbps/8/1024).toFixed(1)+' МБ'; }
@@ -1503,7 +2194,7 @@ $('#exportBtn').onclick=function(){
     $('#exportTxt').textContent='Создаю медитацию… '+Math.round(p*100)+'%'+(eta?' · осталось ≈ '+fmt(eta):'');
   }).then(function(m){
     var item={id:uid(),title:title,category:$('#mCat').value,client:$('#mClient').value.trim(),desc:$('#mDesc').value.trim(),duration:m.info.total,created:Date.now(),size:m.blob.size,kbps:S.kbps,blob:m.blob,
-      music:{mood:S.mood,tuning:S.tuning}};
+      music:{mood:S.mood,tuning:S.tuning,preset:S.preset||null}};
     return libPut(item).then(function(){ return item; });
   }).then(function(item){
     finishExport(); renderLib();
@@ -1715,10 +2406,10 @@ $('#script').oninput=function(){ script=this.value; saveDraft(); };
 $('#voiceFiles').onchange=function(){ var fs=[].slice.call(this.files); this.value=''; fs.reduce(function(p,f){ return p.then(function(){ return addSegment(f, f.name.replace(/\.[^.]+$/,'')); }); },Promise.resolve()); };
 $('#customFile').onchange=function(){
   var f=this.files[0]; this.value=''; if(!f) return; toast('Загружаю дорожку…');
-  loadCustom(f).then(function(d){ customBlob=f; customName=f.name; $('#customName').textContent=f.name+' · '+fmt(d); $('#customDel').classList.remove('hidden'); saveDraft(); toast('Дорожка добавлена'); })
+  loadCustom(f).then(function(d){ customBlob=f; customName=f.name; $('#customName').textContent=f.name+' · '+fmt(d); $('#customDel').classList.remove('hidden'); renderNow(); saveDraft(); toast('Дорожка добавлена'); })
     .catch(function(){ toast('Не удалось прочитать файл'); });
 };
-$('#customDel').onclick=function(){ customBlob=null; customName=''; worker.postMessage({cmd:'custom',data:null}); $('#customName').textContent='Не выбрано'; this.classList.add('hidden'); saveDraft(); };
+$('#customDel').onclick=function(){ customBlob=null; customName=''; worker.postMessage({cmd:'custom',data:null}); $('#customName').textContent='Не выбрано'; this.classList.add('hidden'); renderNow(); saveDraft(); };
 window.addEventListener('beforeunload',function(e){ if(exporting||rec){ e.preventDefault(); e.returnValue=''; } });
 
 /* ---------- запуск ---------- */
@@ -1727,7 +2418,9 @@ try{ if('serviceWorker' in navigator && location.protocol==='https:' && window.s
 makeWorker();
 kvGet('draft').then(function(d){
   if(d){
-    Object.assign(S,d.settings||{}); if(S.qv!==2){ S.kbps=0; S.qv=2; }  // новый режим «Авто» по умолчанию script=d.script||''; prevAt=d.prevAt||0;
+    Object.assign(S,d.settings||{}); if(S.qv!==2){ S.kbps=0; S.qv=2; }  // новый режим «Авто» по умолчанию
+    if(!('preset' in (d.settings||{}))){ S.preset=null; Object.keys(MBASE).forEach(function(k){ if(!(k in (d.settings||{}))) S[k]=MBASE[k]; }); }  // старый черновик: новые слои выключены
+    script=d.script||''; prevAt=d.prevAt||0;
     segs=(d.segs||[]).filter(function(g){return g.blob;}).map(function(g){ return {id:g.id,name:g.name,pause:g.pause,gain:g.gain||0,blob:g.blob,dur:g.dur||0}; });
     customBlob=d.customBlob||null; customName=d.customName||'';
     if(customBlob){ $('#customName').textContent=customName; $('#customDel').classList.remove('hidden'); }
