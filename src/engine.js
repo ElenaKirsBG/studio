@@ -24,7 +24,7 @@ function buildTimeline(st, order) {
   var t = Math.round(st.intro * SR), segs = [];
   for (var k = 0; k < order.length; k++) {
     var d = VOICE[order[k].id]; if (!d) continue;
-    segs.push({ start: t, data: d });
+    segs.push({ start: t, data: d, gain: db2g(+order[k].gain || 0) });
     t += d.length + Math.round((order[k].pause || 0) * SR);
   }
   var voiceEnd = t;
@@ -42,7 +42,7 @@ function voiceEnvelopes(tl, st) {
       var sum = 0, e = Math.min(d.length, j + FR);
       for (var q = j; q < e; q++) sum += d[q] * d[q];
       var fi = Math.floor((sg.start + j) / FR);
-      if (fi < n) rms[fi] = Math.max(rms[fi], Math.sqrt(sum / (e - j)));
+      if (fi < n) rms[fi] = Math.max(rms[fi], Math.sqrt(sum / (e - j)) * sg.gain);
     }
   }
   var gate = new Float32Array(n), duck = new Float32Array(n);
@@ -300,7 +300,7 @@ function* renderGen(msg) {
       // голос
       while (segI < segs.length && segs[segI].start + segs[segI].data.length <= s) segI++;
       var v = 0;
-      if (segI < segs.length && s >= segs[segI].start) v = segs[segI].data[s - segs[segI].start];
+      if (segI < segs.length && s >= segs[segI].start) v = segs[segI].data[s - segs[segI].start] * segs[segI].gain;
       var fr = Math.floor(s / env.FR);
       var gt = env.gate[Math.min(fr, env.gate.length - 1)];
       gsm += (gt - gsm) * 0.004;
