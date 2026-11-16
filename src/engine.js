@@ -75,11 +75,11 @@ function voiceEnvelopes(tl, st) {
     gate[f] = g;
     act[f] = rms[f] > db2g(-42) ? 1 : 0;
   }
-  var a = 1 - Math.exp(-1 / 25), r = 1 - Math.exp(-1 / 160), v = 0, sm = new Float32Array(n);
-  // скользящее «присутствие голоса» c удержанием 0.6 с
+  var a = 1 - Math.exp(-1 / 25), r = 1 - Math.exp(-1 / 100), v = 0, sm = new Float32Array(n);
+  // скользящее «присутствие голоса» c удержанием 0,45 с: в паузах между фразами музыка успевает «вздохнуть»
   var hd = 0;
   for (f = 0; f < n; f++) {
-    if (act[f]) hd = 60; else if (hd > 0) hd--;
+    if (act[f]) hd = 45; else if (hd > 0) hd--;
     var tg = hd > 0 ? 1 : 0;
     v += (tg - v) * (tg > v ? a : r);
     sm[f] = v;
@@ -568,6 +568,72 @@ Reverb.prototype.p = function (x, out) {
   out[0] = L; out[1] = R;
 };
 
+/* ---------- шумоподавление голоса (спектральное) ----------
+   Профиль шума берётся из самых тихих кадров записи (паузы между словами, начало и конец).
+   Затем в каждом кадре 23 мс подавляются только те частоты, где энергии не больше, чем у шума:
+   шипение уходит и во время речи, а сам голос не меняется. Сила: 1 — мягко, 2 — средне, 3 — сильно. */
+function fftPrep(n) {
+  var lev = Math.round(Math.log(n) / Math.LN2), rev = new Uint32Array(n), c = new Float32Array(n / 2), si = new Float32Array(n / 2), i, b;
+  for (i = 0; i < n; i++) { var r = 0; for (b = 0; b < lev; b++) r |= ((i >> b) & 1) << (lev - 1 - b); rev[i] = r; }
+  for (i = 0; i < n / 2; i++) { c[i] = Math.cos(2 * Math.PI * i / n); si[i] = -Math.sin(2 * Math.PI * i / n); }
+  return { n: n, rev: rev, c: c, s: si };
+}
+function fft(P, re, im, inv) {
+  var n = P.n, i, j, t;
+  for (i = 0; i < n; i++) { j = P.rev[i]; if (j > i) { t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (var size = 2; size <= n; size <<= 1) {
+    var half = size >> 1, step = n / size;
+    for (i = 0; i < n; i += size) for (j = 0; j < half; j++) {
+      var k = j * step, wr = P.c[k], wi = inv ? -P.s[k] : P.s[k], a = i + j, bb = a + half;
+      var xr = re[bb] * wr - im[bb] * wi, xi = re[bb] * wi + im[bb] * wr;
+      re[bb] = re[a] - xr; im[bb] = im[a] - xi; re[a] += xr; im[a] += xi;
+    }
+  }
+}
+function denoise(src, strength) {
+  strength = +strength || 0;
+  var N = 1024, H = 512;
+  if (!strength || src.length < N * 8) return src;
+  var d = new Float32Array(src.length + 2 * N); d.set(src, N);
+  var P = fftPrep(N), w = new Float32Array(N), i, k, f;
+  for (i = 0; i < N; i++) w[i] = Math.sin(Math.PI * (i + 0.5) / N);   // √Ханна: при 50% перекрытии сумма квадратов = 1
+  var nF = Math.floor((d.length - N) / H) + 1, e = new Float32Array(nF);
+  for (f = 0; f < nF; f++) { var se = 0, o = f * H; for (i = 0; i < N; i++) se += d[o + i] * d[o + i]; e[f] = se; }
+  // тихие кадры, но не нули из добавленных краёв
+  var idx = []; for (f = 0; f < nF; f++) if (f * H >= N && f * H + N <= N + src.length) idx.push(f);
+  if (idx.length < 12) return src;
+  idx.sort(function (a, b) { return e[a] - e[b]; });
+  var q = idx.slice(0, Math.max(8, Math.floor(idx.length * 0.1)));
+  var K = N / 2 + 1, np = new Float64Array(K), re = new Float32Array(N), im = new Float32Array(N);
+  q.forEach(function (fr) {
+    var o = fr * H; for (var i2 = 0; i2 < N; i2++) { re[i2] = d[o + i2] * w[i2]; im[i2] = 0; }
+    fft(P, re, im, false); for (var k2 = 0; k2 < K; k2++) np[k2] += re[k2] * re[k2] + im[k2] * im[k2];
+  });
+  var ns = new Float64Array(K);
+  for (k = 0; k < K; k++) { var acc = 0, cnt = 0; for (var j = -2; j <= 2; j++) if (k + j >= 0 && k + j < K) { acc += np[k + j]; cnt++; } ns[k] = acc / cnt / q.length; }
+  var over = [0, 2.5, 3.5, 5][strength] || 3.5, fl = [1, 0.22, 0.12, 0.07][strength] || 0.12;  // −13 / −18 / −23 дБ
+  var out = new Float32Array(d.length), g = new Float32Array(K), gs = new Float32Array(K), g2 = new Float32Array(K);
+  for (k = 0; k < K; k++) gs[k] = fl;
+  for (f = 0; f < nF; f++) {
+    var off = f * H;
+    for (i = 0; i < N; i++) { re[i] = d[off + i] * w[i]; im[i] = 0; }
+    fft(P, re, im, false);
+    for (k = 0; k < K; k++) {
+      var pw = re[k] * re[k] + im[k] * im[k], x = 1 - over * ns[k] / (pw + 1e-20);
+      g[k] = x > fl * fl ? Math.sqrt(x) : fl;
+    }
+    for (k = 0; k < K; k++) { var a1 = g[k > 0 ? k - 1 : k], a3 = g[k < K - 1 ? k + 1 : k]; g2[k] = 0.25 * a1 + 0.5 * g[k] + 0.25 * a3; }
+    for (k = 0; k < K; k++) { var gt = g2[k]; gs[k] = gt > gs[k] ? gs[k] + (gt - gs[k]) * 0.85 : gs[k] * 0.55 + gt * 0.45; }
+    for (k = 0; k < K; k++) {
+      re[k] *= gs[k]; im[k] *= gs[k];
+      if (k > 0 && k < N / 2) { re[N - k] *= gs[k]; im[N - k] *= gs[k]; }
+    }
+    fft(P, re, im, true);
+    for (i = 0; i < N; i++) out[off + i] += re[i] / N * w[i];
+  }
+  return out.slice(N, N + src.length);
+}
+
 /* ---------- основной рендер ---------- */
 function* renderGen(msg) {
   var st = msg.settings, tl = buildTimeline(st, msg.order);
@@ -603,7 +669,7 @@ function* renderGen(msg) {
   var rev = st.reverb > 0 ? new Reverb(st.reverbSize == null ? 0.6 : st.reverbSize) : null;
 
   var cv = st.customVol / 100;
-  var music = db2g(st.musicDb), voiceG = db2g(st.voiceDb), duckDepth = 1 - db2g(-st.duckDb);
+  var music = db2g(st.musicDb + 10), voiceG = db2g(st.voiceDb), duckDepth = 1 - db2g(-st.duckDb);
   var wet = st.reverb / 100 * 1.1, dry = 1 - st.reverb / 100 * 0.25;
   var gateFloor = st.gate ? db2g(-22) : 1;
   var fi = st.fadeIn * SR, fo = st.fadeOut * SR;
@@ -699,7 +765,7 @@ if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typ
   self.onmessage = function (e) {
     var m = e.data;
     try {
-      if (m.cmd === 'voice') { VOICE[m.id] = m.data; return; }
+      if (m.cmd === 'voice') { VOICE[m.id] = m.nr ? denoise(m.data, m.nr) : m.data; return; }
       if (m.cmd === 'dropVoice') { delete VOICE[m.id]; return; }
       if (m.cmd === 'custom') { CUSTOM = m.data; return; }
       if (m.cmd === 'info') { var tl = buildTimeline(m.settings, m.order); self.postMessage({ cmd: 'info', total: tl.total / SR, voiceEnd: tl.voiceEnd / SR, reqId: m.reqId }); return; }
@@ -734,4 +800,4 @@ if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typ
     } catch (err) { self.postMessage({ cmd: 'error', message: String(err && err.message || err), job: m.job }); }
   };
 }
-if (typeof module !== 'undefined') module.exports = { render: render, VOICE: VOICE, setCustom: function (c) { CUSTOM = c; }, SR: SR, buildTimeline: buildTimeline };
+if (typeof module !== 'undefined') module.exports = { denoise: denoise, render: render, VOICE: VOICE, setCustom: function (c) { CUSTOM = c; }, SR: SR, buildTimeline: buildTimeline };

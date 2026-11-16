@@ -176,6 +176,9 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
         <label class="btn mini" style="cursor:pointer">＋ Загрузить аудиофайлы<input type="file" id="voiceFiles" accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm,.aac" multiple hidden></label>
       </div>
       <label class="chk"><input type="checkbox" id="trim" checked> <span>Автоматически обрезать тишину в начале и конце фрагмента и выравнивать громкость</span></label>
+      <div class="grid2" style="margin:4px 0 8px"><div><label class="f">Шумоподавление голоса (убирает шипение и во время речи)</label>
+        <select id="nr"><option value="0">Выключено</option><option value="1">Мягкое</option><option value="2">Среднее (рекомендую)</option><option value="3">Сильное — если шипение всё ещё слышно</option></select></div>
+        <div class="small muted" style="align-self:end">Шум микрофона подавляется во всей записи, а не только в паузах, поэтому голос и музыка звучат как единое целое. После смены режима фрагменты пересчитаются за несколько секунд.</div></div>
       <div id="segList"><p class="muted small">Пока нет фрагментов. Запишите голос или загрузите готовую запись (например, из диктофона телефона).</p></div>
       <div class="row small muted" style="margin-top:8px" id="voiceTotal"></div>
     </div>
@@ -498,7 +501,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
     <div class="card">
       <h3>Баланс и обработка голоса</h3>
       <div class="sl"><label>Громкость голоса</label><input type="range" id="voiceDb" min="-12" max="8"><span class="v" id="voiceDbV"></span></div>
-      <div class="sl"><label>Громкость музыки</label><input type="range" id="musicDb" min="-30" max="0"><span class="v" id="musicDbV"></span></div>
+      <div class="sl"><label>Громкость музыки</label><input type="range" id="musicDb" min="-30" max="6"><span class="v" id="musicDbV"></span></div>
       <div class="sl"><label>Приглушать музыку под голосом</label><input type="range" id="duckDb" min="0" max="15"><span class="v" id="duckDbV"></span></div>
       <div class="sl"><label>Объём (реверберация)</label><input type="range" id="reverb" min="0" max="60"><span class="v" id="reverbV"></span></div>
       <div class="sl"><label>Размер пространства</label><input type="range" id="reverbSize" min="0" max="1" step="0.05"><span class="v" id="reverbSizeV"></span></div>
@@ -515,7 +518,8 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
             <li><b>Объём (реверберация)</b> — эхо помещения вокруг голоса. Голос становится объёмным и «обволакивающим». 10–20% — естественно. 25–35% — медитативно, «в пространстве». Больше 40% — голос уходит вдаль и теряет разборчивость.</li>
             <li><b>Размер пространства</b> — комната (близко, интимно), зал (по умолчанию) или храм (длинный хвост, торжественно). Для сна и сердечных практик — комната или зал. Для рода, космоса и регрессии — храм с объёмом 20–25%.</li>
             <li><b>Компрессор</b> — выравнивает тихие и громкие слова, голос звучит ровно и «по-радийному» близко. Держите включённым.</li>
-            <li><b>Тишина между фразами</b> — в паузах между словами убирает фоновое шипение и шум комнаты. Держите включённым. Если кажется, что обрезаются тихие окончания слов, выключите.</li>
+            <li><b>Тишина между фразами</b> — в паузах между словами дополнительно приглушает остаток шума комнаты. Держите включённым. Если кажется, что обрезаются тихие окончания слов, выключите.</li>
+            <li><b>Шумоподавление голоса</b> (вкладка «Голос») — убирает шипение микрофона во всей записи, в том числе во время речи. «Среднее» подходит почти всегда. Если шипение всё ещё слышно — «Сильное». Если голос стал «подводным», металлическим — «Мягкое».</li>
           </ul>
           <p><b>Если что-то не так:</b></p>
           <table class="tbl">
@@ -525,7 +529,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
             <tr><td>Музыка «качается» вверх-вниз</td><td>Уменьшите приглушение до 4–6 дБ</td></tr>
             <tr><td>Голос как в бочке, неразборчиво</td><td>Объём меньше (10–15%), пространство — комната</td></tr>
             <tr><td>Голос «сухой», плоский</td><td>Объём 20–25%</td></tr>
-            <tr><td>Шипение в паузах</td><td>Включите «Тишина между фразами»</td></tr>
+            <tr><td>Шипение под голосом или в паузах</td><td>Вкладка «Голос» → шумоподавление «Среднее» или «Сильное», плюс «Тишина между фразами»</td></tr>
             <tr><td>Один фрагмент громче или тише других</td><td>Вкладка «Голос» → громкость фрагмента ±дБ</td></tr>
             <tr><td>Слишком громкие «события» (чаши, птицы)</td><td>Вкладка «Музыка» → уменьшите этот слой</td></tr>
           </table>
@@ -632,7 +636,7 @@ var PRESETS = [
   {id:'space',name:'✨ Космос',desc:'«Космос» на стеклянном тембре, поющие чаши, колокольчики и тета-ритм.',set:{mood:'space',padTone:'glass',padVol:65,bowlVol:28,chimeVol:10,binVol:14,binType:'theta'},mix:{outro:45,fadeOut:20,reverb:26,reverbSize:0.85}}
 ];
 function presetById(id){ for(var i=0;i<PRESETS.length;i++) if(PRESETS[i].id===id) return PRESETS[i]; return null; }
-var DEF = Object.assign({qv:2,kbps:0,intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,tuning:432,seed:0,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,fs:26},
+var DEF = Object.assign({qv:2,nr:2,kbps:0,intro:20,outro:40,minTotal:0,fadeIn:8,fadeOut:15,tuning:432,seed:0,customVol:60,musicDb:-8,voiceDb:0,duckDb:6,reverb:18,reverbSize:0.6,gate:true,comp:true,trim:true,noiseSup:false,fs:26},
   MBASE, presetById('relax').set, {preset:'relax'});
 var S = Object.assign({}, DEF);
 var segs = [];          // {id,name,pause,blob,dur}
@@ -755,7 +759,7 @@ function prepVoice(d, trim){
 function loadSeg(g){
   return decode(g.blob).then(function(buf){
     var d=prepVoice(mono(buf), S.trim); g.dur=d.length/SR;
-    worker.postMessage({cmd:'voice',id:g.id,data:d},[d.buffer]);
+    worker.postMessage({cmd:'voice',id:g.id,data:d,nr:S.nr},[d.buffer]);
     return g;
   });
 }
@@ -919,7 +923,7 @@ var SL = {
   fadeIn:function(v){return v+' с';}, fadeOut:function(v){return v+' с';}, voiceDb:function(v){return (v>0?'+':'')+v+' дБ';}, musicDb:function(v){return v+' дБ';},
   duckDb:function(v){return v?'−'+v+' дБ':'нет';}, reverb:function(v){return v+'%';}, reverbSize:function(v){ return v<0.35?'комната':v<0.7?'зал':'храм'; }
 };
-var SELS = ['mood','padTone','tuning','melInst','binType','binMode','binCarrier','toneHz','kbps'], NUMSEL = {tuning:1,kbps:1,binCarrier:1,toneHz:1};
+var SELS = ['nr','mood','padTone','tuning','melInst','binType','binMode','binCarrier','toneHz','kbps'], NUMSEL = {nr:1,tuning:1,kbps:1,binCarrier:1,toneHz:1};
 var CHKS = ['comp','gate','trim','noiseSup','binRamp'];
 function refreshLabels(){ Object.keys(SL).forEach(function(k){ var vv=$('#'+k+'V'); if(vv) vv.textContent=SL[k](+S[k]); }); }
 function bindSettings(){
@@ -927,7 +931,7 @@ function bindSettings(){
     var el=$('#'+k); if(!el) return; el.value=S[k];
     el.oninput=function(){ S[k]=+el.value; refreshLabels(); if(['intro','outro','minTotal'].indexOf(k)>=0) updateInfo(); changed(); };
   });
-  SELS.forEach(function(k){ var el=$('#'+k); el.value=String(S[k]); el.onchange=function(){ S[k]=NUMSEL[k]?+el.value:el.value; refreshLabels(); changed(); }; });
+  SELS.forEach(function(k){ var el=$('#'+k); el.value=String(S[k]); el.onchange=function(){ S[k]=NUMSEL[k]?+el.value:el.value; refreshLabels(); changed(); if(k==='nr'&&segs.length){ reloadAll(); toast('Пересчитываю фрагменты с новым шумоподавлением…'); } }; });
   CHKS.forEach(function(k){ var el=$('#'+k); el.checked=!!S[k]; el.onchange=function(){ S[k]=el.checked; changed(); }; });
   refreshLabels(); renderPresets(); renderNow();
 }
@@ -1259,7 +1263,7 @@ function renderLib(){
         (i.desc?'<div class="small muted" style="margin-top:6px;white-space:pre-wrap">'+esc(i.desc)+'</div>':'')+
         '<div class="lplayer"></div>'+
         '<div class="row" style="margin-top:10px;gap:6px"><button class="mini lplay">▶ Слушать</button><button class="mini ldl">⬇ MP3</button>'+(share?'<button class="mini lsh">📤 Отправить</button>':'')+
-        '<button class="mini lpub">'+(i.pub?'✓ В приложении':'🌐 В приложение')+'</button><button class="mini ghost ledit">✎ Изменить</button><button class="mini ghost danger ldel">Удалить</button></div><div class="ledform"></div></div>';
+        '<button class="mini lpub">'+(i.pub?'✓ В приложении'+(i.pubFree?' · бесплатно':''):'📲 В приложение')+'</button><button class="mini ghost ledit">✎ Изменить</button><button class="mini ghost danger ldel">Удалить</button></div><div class="ledform"></div></div>';
     }).join(''):'<p class="muted small">'+(libItems.length?'Ничего не найдено.':'Здесь появятся готовые медитации. Создайте первую во вкладке «Сведение».')+'</p>';
   });
 }
@@ -1274,8 +1278,8 @@ $('#libList').addEventListener('click',function(e){
     var b=e.target.closest('.ldel'); if(!b.dataset.arm){ b.dataset.arm='1'; b.textContent='Точно удалить?'; setTimeout(function(){ if(b.isConnected){ delete b.dataset.arm; b.textContent='Удалить'; } },4000); return; }
     libDel(it.id).then(renderLib).then(function(){ toast('Удалено'); });
   }
-  else if(e.target.closest('.lpub')){ publishItem(it, card); }
-  else if(e.target.closest('.pubGo')){ var pw=card.querySelector('.pubPw').value; medLogin(pw).then(function(){ card.querySelector('.ledform').innerHTML=''; publishItem(it, card); }).catch(function(err){ card.querySelector('.pubMsg').textContent=err.message; }); }
+  else if(e.target.closest('.lpub')){ pubForm(it, card); }
+  else if(e.target.closest('.pubGo')){ pubGo(it, card); }
   else if(e.target.closest('.ledit')){
     var f=card.querySelector('.ledform');
     if(f.innerHTML){ f.innerHTML=''; return; }
@@ -1295,25 +1299,46 @@ function medLogin(pw){
     .catch(function(e){ throw new Error(e.message==='Failed to fetch'?'Нет связи с сайтом. Публикация работает, когда студия открыта на вашем сайте.':e.message); });
 }
 function b64url(str){ var b=new TextEncoder().encode(str),x=''; b.forEach(function(c){ x+=String.fromCharCode(c); }); return btoa(x).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
-function publishItem(it, card){
-  var tok=medTok();
-  if(!tok){
-    card.querySelector('.ledform').innerHTML='<div style="margin-top:12px"><label class="f">Пароль генератора ключей (вход автора в приложение «Медитации»)</label><input type="password" class="pubPw" autocomplete="current-password"><div class="row" style="margin-top:8px"><button class="primary mini pubGo">Войти и отправить</button></div><div class="small muted pubMsg" style="margin-top:6px">Вход запоминается на 30 дней.</div></div>';
-    return;
-  }
+function pubForm(it, card){
+  var tok=medTok(), f=card.querySelector('.ledform');
+  if(f.querySelector('.pubGo')){ f.innerHTML=''; return; }
+  f.innerHTML='<div class="note" style="margin-top:12px">'+
+    (it.pub?'<div class="small" style="margin-bottom:6px">Эта медитация уже есть в приложении — аудио и описание будут заменены новой версией.</div>':'')+
+    '<label class="chk"><input type="checkbox" class="pubShow" checked> <span>Сразу показать клиентам в приложении</span></label>'+
+    '<label class="chk"><input type="checkbox" class="pubFree"'+(it.pubFree?' checked':'')+'> <span>Бесплатная — слушают все, даже без покупки ключа (для бесплатной версии приложения)</span></label>'+
+    (tok?'':'<label class="f" style="margin-top:8px">Пароль генератора ключей (вход автора, запоминается на 30 дней)</label><input type="password" class="pubPw" autocomplete="current-password">')+
+    '<div class="row" style="margin-top:10px"><button class="primary mini pubGo">📲 Отправить в приложение</button></div>'+
+    '<div class="small muted pubMsg" style="margin-top:6px">Раздел, название и описание берутся из карточки медитации («✎ Изменить»).</div></div>';
+}
+function pubGo(it, card){
+  var msg=card.querySelector('.pubMsg'), pw=card.querySelector('.pubPw');
+  var opt={show:card.querySelector('.pubShow').checked, free:card.querySelector('.pubFree').checked};
+  var go=function(){ publishItem(it, card, opt); };
+  if(pw){ msg.textContent='Вхожу…'; medLogin(pw.value).then(go).catch(function(err){ msg.textContent=err.message; }); }
+  else go();
+}
+function publishItem(it, card, opt){
+  opt=opt||{show:false,free:false};
+  var tok=medTok(), msg=card&&card.querySelector('.pubMsg');
+  var say=function(t){ if(msg) msg.textContent=t; toast(t); };
+  if(!tok){ if(card){ card.querySelector('.ledform').innerHTML=''; pubForm(it, card); } return; }
   var meta={title:it.title,cat:it.category,desc:it.desc||'',dur:Math.round(it.duration||0)};
-  if(it.pub) meta.id=it.pub; else meta.hidden=true;
-  toast('Отправляю в приложение… 0%');
+  if(it.pub) meta.id=it.pub; else meta.hidden=!opt.show;
+  say('Отправляю в приложение… 0%');
   var x=new XMLHttpRequest(); x.open('PUT',MED_API+'admin/upload?meta='+b64url(JSON.stringify(meta)));
   x.setRequestHeader('authorization','Bearer '+tok); x.setRequestHeader('content-type','audio/mpeg');
-  x.upload.onprogress=function(e){ if(e.lengthComputable) toast('Отправляю в приложение… '+Math.round(e.loaded/e.total*100)+'%'); };
+  x.upload.onprogress=function(e){ if(e.lengthComputable) say('Отправляю в приложение… '+Math.round(e.loaded/e.total*100)+'%'); };
   x.onload=function(){ var d={}; try{ d=JSON.parse(x.responseText); }catch(e){}
-    if(x.status===401){ try{ localStorage.removeItem('studio.medAdm'); }catch(e){} publishItem(it,card); return; }
-    if(x.status<200||x.status>=300){ toast('Не получилось: '+(d.error||x.status)); return; }
-    it.pub=d.item.id; it.pubAt=Date.now(); libPut(it).then(renderLib);
-    toast(meta.id?'Аудио в приложении обновлено':'Отправлено! Медитация пока скрыта — опубликуйте её в кабинете автора приложения');
+    if(x.status===401){ try{ localStorage.removeItem('studio.medAdm'); }catch(e){} if(card){ card.querySelector('.ledform').innerHTML=''; pubForm(it, card); } toast('Войдите заново'); return; }
+    if(x.status<200||x.status>=300){ say('Не получилось: '+(d.error||('ошибка '+x.status))); return; }
+    var id=d.item.id;
+    fetch(MED_API+'admin/save',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tok},body:JSON.stringify({items:[{id:id,hidden:!opt.show,free:!!opt.free}]})})
+      .catch(function(){}).then(function(){
+        it.pub=id; it.pubAt=Date.now(); it.pubFree=!!opt.free; it.pubShown=!!opt.show; libPut(it).then(renderLib);
+        toast(opt.show?(opt.free?'Готово: медитация в приложении, бесплатная для всех':'Готово: медитация в приложении, доступна по ключу'):'Отправлено скрытой — показать её можно в кабинете автора приложения');
+      });
   };
-  x.onerror=function(){ toast('Нет связи с сайтом. Публикация работает, когда студия открыта на вашем сайте.'); };
+  x.onerror=function(){ say('Нет связи с сайтом. Отправка работает, когда студия открыта с вашего сайта elenakirsanova.com/meditations/studio/'); };
   x.send(it.blob);
 }
 
