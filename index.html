@@ -1267,15 +1267,15 @@ function updateInfo(){
   if(prevAt>T.total) prevAt=Math.max(0,T.total-60);
   var html=T.parts.map(function(p){ return '<div class="tl-'+p.k+'" style="width:'+(p.d/T.total*100)+'%"></div>'; }).join('');
   $('#timeline').innerHTML=html+'<span class="tl-cursor" style="left:'+(prevAt/T.total*100)+'%"></span>';
-  $('#prevAt').textContent=fmt(prevAt);
+  var pa=$('#prevAt'); if(pa) pa.textContent=fmt(prevAt);
 }
 $('#timeline').onclick=function(e){ var r=this.getBoundingClientRect(); prevAt=Math.max(0,(e.clientX-r.left)/r.width*totals().total); updateInfo(); saveDraft(); };
 
 /* ---------- прослушивание ----------
    Звук играет через обычный аудиоэлемент, а не Web Audio: на iPhone Web Audio молчит,
    когда включён беззвучный режим, а аудиоэлемент звучит всегда (как музыка и видео). */
-var busy=false, pAudio=new Audio(), pUrl=null;
-pAudio.setAttribute('playsinline',''); pAudio.preload='auto';
+var busy=false, pAudio=document.createElement('audio'), pUrl=null, playBtn=null;
+pAudio.setAttribute('playsinline',''); pAudio.preload='auto'; pAudio.style.display='none'; document.body.appendChild(pAudio);
 try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}
 function wavBlob(L,R){
   var n=L.length, buf=new ArrayBuffer(44+n*4), v=new DataView(buf), i, o=44;
@@ -1289,12 +1289,21 @@ var SILENT=URL.createObjectURL(wavBlob(new Float32Array(2205),new Float32Array(2
 function unlockAudio(){ // вызывается прямо в нажатии: после этого iPhone разрешит включить звук, когда он будет готов
   try{ if(!pAudio.src||pAudio.src===SILENT){ pAudio.src=SILENT; var p=pAudio.play(); if(p&&p.catch) p.catch(function(){}); } }catch(e){}
 }
+var BTN_TXT={musicPrev:'▶ Послушать музыку 30 с'};
 function stopPlay(){
-  try{ if(pAudio.src!==SILENT) pAudio.pause(); }catch(e){}
+  if(pAudio.src!==SILENT){
+    try{ pAudio.pause(); }catch(e){}
+    try{ pAudio.currentTime=0; }catch(e){}
+    try{ pAudio.src=SILENT; pAudio.load(); }catch(e){}   // выгружаем звук совсем: на iPhone пауза иногда не срабатывает
+  }
   $('#prevStop').classList.add('hidden'); $('#musicStop').classList.add('hidden'); $('#prevStatus').textContent=''; $('#musicStatus').textContent='';
   $('#musicPrev').disabled=false; $('#prevBtn').disabled=false;
+  $('#musicPrev').textContent=BTN_TXT.musicPrev; $('#musicPrev').classList.remove('danger');
+  $('#prevBtn').innerHTML='▶ Прослушать 60 с с отметки <span id="prevAt">'+fmt(prevAt)+'</span>'; $('#prevBtn').classList.remove('danger');
+  playBtn=null;
 }
 pAudio.addEventListener('ended',function(){ if(pAudio.src!==SILENT) stopPlay(); });
+if('mediaSession' in navigator){ try{ navigator.mediaSession.setActionHandler('pause',stopPlay); navigator.mediaSession.setActionHandler('stop',stopPlay); }catch(e){} }
 function playLR(L,R,stopBtn,statusEl){
   stopPlay();
   if(pUrl) URL.revokeObjectURL(pUrl);
@@ -1302,6 +1311,8 @@ function playLR(L,R,stopBtn,statusEl){
   var p=pAudio.play();
   $(stopBtn).classList.remove('hidden');
   if(statusEl) statusEl.textContent='Играет';
+  playBtn=stopBtn==='#musicStop'?$('#musicPrev'):$('#prevBtn');
+  playBtn.disabled=false; playBtn.textContent='■ Остановить'; playBtn.classList.add('danger');
   if(p&&p.catch) p.catch(function(){ if(statusEl) statusEl.textContent='Нажмите ещё раз, чтобы включить звук'; $(stopBtn).classList.add('hidden'); pAudio.src=SILENT; });
 }
 function preview(opts, stopBtn, statusEl, btn){
@@ -1314,9 +1325,9 @@ function preview(opts, stopBtn, statusEl, btn){
     .then(function(m){ busy=false; if(btn) btn.disabled=false; playLR(m.L,m.R,stopBtn,statusEl); })
     .catch(function(e){ busy=false; if(btn) btn.disabled=false; if(statusEl) statusEl.textContent=''; toast('Ошибка: '+e.message); });
 }
-$('#prevBtn').onclick=function(){ if(!segs.length) toast('Голоса пока нет — прозвучит только музыка'); preview({from:prevAt,len:60},'#prevStop',$('#prevStatus'),$('#prevBtn')); };
+$('#prevBtn').onclick=function(){ if(playBtn===this){ stopPlay(); return; } if(!segs.length) toast('Голоса пока нет — прозвучит только музыка'); preview({from:prevAt,len:60},'#prevStop',$('#prevStatus'),$('#prevBtn')); };
 $('#prevStop').onclick=stopPlay; $('#musicStop').onclick=stopPlay;
-$('#musicPrev').onclick=function(){ preview({noVoice:true,from:0,len:30,st:{minTotal:1,intro:0,fadeIn:3,fadeOut:3,outro:30}},'#musicStop',$('#musicStatus'),$('#musicPrev')); };
+$('#musicPrev').onclick=function(){ if(playBtn===this){ stopPlay(); return; } preview({noVoice:true,from:0,len:30,st:{minTotal:1,intro:0,fadeIn:3,fadeOut:3,outro:30}},'#musicStop',$('#musicStatus'),$('#musicPrev')); };
 
 /* ---------- экспорт ---------- */
 var wakeLock=null, exporting=false;
